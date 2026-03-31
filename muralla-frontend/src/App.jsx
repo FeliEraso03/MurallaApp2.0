@@ -101,7 +101,7 @@ function App() {
     if (mapInstance) return;
     const m = new maplibregl.Map({
       container: mapContainer.current,
-      style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json', 
+      style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json', 
       center: [CENTRO_HISTORICO.lng, CENTRO_HISTORICO.lat],
       zoom: 16,
       maxBounds: BOUNDS
@@ -111,6 +111,51 @@ function App() {
     
     m.on('load', () => {
       setMapInstance(m);
+
+      // Add high-contrast custom POIs for Cartagena
+      m.addSource('cartagena-pois', {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: [
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5495, 10.4235] }, properties: { name: '🏰 Torre del Reloj', type: 'monument' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5510, 10.4243] }, properties: { name: '⛪ Plaza San Pedro Claver', type: 'plaza' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5515, 10.4258] }, properties: { name: '🏛️ Palacio de la Inquisición', type: 'museum' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5504, 10.4265] }, properties: { name: '🌳 Plaza de Bolívar', type: 'plaza' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5528, 10.4245] }, properties: { name: '🍽️ Plaza Santo Domingo', type: 'plaza' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5460, 10.4215] }, properties: { name: '🎨 Barrio Getsemaní', type: 'culture' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5482, 10.4222] }, properties: { name: '🍻 Plazuela de la Trinidad', type: 'plaza' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5520, 10.4285] }, properties: { name: '🏫 Las Bóvedas', type: 'history' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5398, 10.4225] }, properties: { name: '⛰️ Castillo de San Felipe', type: 'fortress' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5455, 10.4261] }, properties: { name: '🛍️ Mercado de Bazurto', type: 'local' } }
+          ]
+        }
+      });
+
+      m.addLayer({
+        id: 'cartagena-poi-labels',
+        type: 'symbol',
+        source: 'cartagena-pois',
+        layout: {
+          'text-field': '{name}',
+          'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
+          'text-size': 13,
+          'text-anchor': 'bottom',
+          'text-offset': [0, -1]
+        },
+        paint: {
+          'text-color': '#ffffff',
+          'text-halo-color': '#f77f00',
+          'text-halo-width': 1.5,
+          'text-halo-blur': 1
+        }
+      });
+      
+      // Make roads pop even more by lightening the highway layer of the basemap
+      if (m.getLayer('highway_name_other')) {
+        m.setPaintProperty('highway_name_other', 'text-color', '#00b4d8');
+        m.setPaintProperty('highway_name_other', 'text-halo-color', '#000000');
+      }
     });
 
     return () => {
