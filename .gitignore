@@ -1,7 +1,6 @@
 .worktrees/
 
 # Secrets and local configurations
-muralla-backend/src/main/resources/application.properties
 muralla-frontend/.env
 *.env
 **/target/
