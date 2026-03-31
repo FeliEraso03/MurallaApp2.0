@@ -13,11 +13,15 @@ public class RegisterRequest {
     private String fullName;
     private String email;
     private String password;
-    
-    // Preferences required during setup
+
+    // Optional preferences during registration (wizard fills these after)
     private Integer defaultTimeAvailableHours;
+    private String  mobilityType;
+    private String  groupType;
     private Integer interestCulture;
-    private Integer interestGastronomy;
     private Integer interestReligion;
+    private Integer interestGastronomy;
+    private Integer interestNature;
+    private Integer interestArts;
     private Integer interestAdventure;
 }

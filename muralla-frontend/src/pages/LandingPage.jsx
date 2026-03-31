@@ -1,9 +1,12 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import '../App.css'; 
+import { Link, useNavigate } from 'react-router-dom';
+import '../App.css';
 import { IconScience, IconSafe, IconCpu, IconMap, IconDatabase } from '../components/Icons';
+import { useAuth } from '../utils/authContext';
 
 export const LandingPage = () => {
+    const navigate = useNavigate();
+    const { user, logout } = useAuth();
     return (
         <div className="landing-container">
             {/* Navbar */}
@@ -15,6 +18,29 @@ export const LandingPage = () => {
                     <Link to="/" className="nav-link active">Home</Link>
                     <Link to="/instructions" className="nav-link">Instrucciones</Link>
                     <Link to="/about" className="nav-link">Acerca de</Link>
+                    {user ? (
+                        <>
+                            <Link to="/editor" className="nav-link" style={{color:'var(--orange)',fontWeight:600}}>Editor</Link>
+                            <button
+                                onClick={() => { logout(); }}
+                                className="nav-link"
+                                style={{background:'none',border:'none',cursor:'pointer',padding:0,color:'rgba(255,255,255,0.5)'}}
+                            >
+                                Cerrar sesión
+                            </button>
+                        </>
+                    ) : (
+                        <Link
+                            to="/login"
+                            style={{
+                                background:'linear-gradient(135deg,var(--orange),#e55d02)',
+                                color:'white', padding:'8px 18px', borderRadius:'8px',
+                                textDecoration:'none', fontWeight:700, fontSize:'0.88rem',
+                            }}
+                        >
+                            Iniciar sesión
+                        </Link>
+                    )}
                 </div>
             </nav>
 
@@ -29,7 +55,9 @@ export const LandingPage = () => {
                         Optimizando la seguridad y la experiencia del visitante en Cartagena mediante algoritmos avanzados de grafos y lógica combinatoria.
                     </p>
                     <div className="hero-buttons">
-                        <Link to="/editor" className="cta-btn primary lg">Get Started Now</Link>
+                        <Link to={user ? '/editor' : '/register'} className="cta-btn primary lg">
+                            {user ? 'Ir al Editor' : 'Comenzar gratis'}
+                        </Link>
                         <Link to="/instructions" className="cta-btn outline lg">Manual de Usuario</Link>
                     </div>
                 </div>
@@ -132,7 +160,9 @@ export const LandingPage = () => {
                     Únete a los investigadores y turistas que ya utilizan el poder de la ciencia para recorrer la Ciudad Heroica.
                 </p>
                 <div style={{display: 'flex', gap: '1rem', justifyContent: 'center'}}>
-                    <Link to="/editor" className="cta-btn primary lg">Comenzar Ahora</Link>
+                    <Link to={user ? '/editor' : '/register'} className="cta-btn primary lg">
+                        {user ? 'Ir al Editor' : 'Crear cuenta gratis'}
+                    </Link>
                     <Link to="/about" className="cta-btn outline lg">Sobre el Proyecto</Link>
                 </div>
                 <div style={{marginTop: '4rem'}}>

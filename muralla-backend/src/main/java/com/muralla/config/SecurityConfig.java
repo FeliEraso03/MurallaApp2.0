@@ -27,7 +27,7 @@ public class SecurityConfig {
                 .cors(org.springframework.security.config.Customizer.withDefaults())
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authz -> authz
-                        .requestMatchers("/", "/error", "/api/auth/**", "/api/routes/generate").permitAll()
+                        .requestMatchers("/", "/error", "/api/auth/**", "/api/routes/generate", "/oauth2/**", "/login/oauth2/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))

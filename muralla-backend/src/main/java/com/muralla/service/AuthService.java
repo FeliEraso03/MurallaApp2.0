@@ -24,14 +24,18 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
 
     public AuthResponse register(RegisterRequest request) {
-        
-        // Build the preferences from the payload
+
+        // Build preferences with safe defaults for wizard-deferred values
         UserPreference preference = UserPreference.builder()
-                .defaultTimeAvailableHours(request.getDefaultTimeAvailableHours() != null ? request.getDefaultTimeAvailableHours() : 4)
-                .interestCulture(request.getInterestCulture() != null ? request.getInterestCulture() : 5)
-                .interestGastronomy(request.getInterestGastronomy() != null ? request.getInterestGastronomy() : 5)
-                .interestReligion(request.getInterestReligion() != null ? request.getInterestReligion() : 5)
-                .interestAdventure(request.getInterestAdventure() != null ? request.getInterestAdventure() : 5)
+                .defaultTimeAvailableHours(orDefault(request.getDefaultTimeAvailableHours(), 4))
+                .mobilityType(request.getMobilityType() != null ? request.getMobilityType() : "WALK")
+                .groupType(request.getGroupType() != null ? request.getGroupType() : "SOLO")
+                .interestCulture(orDefault(request.getInterestCulture(), 5))
+                .interestReligion(orDefault(request.getInterestReligion(), 5))
+                .interestGastronomy(orDefault(request.getInterestGastronomy(), 5))
+                .interestNature(orDefault(request.getInterestNature(), 5))
+                .interestArts(orDefault(request.getInterestArts(), 5))
+                .interestAdventure(orDefault(request.getInterestAdventure(), 5))
                 .build();
 
         var user = User.builder()
@@ -39,13 +43,12 @@ public class AuthService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.USER)
-                .preference(preference) // Link preference
+                .preference(preference)
                 .build();
-                
+
         // Bidirectional consistency
         preference.setUser(user);
 
-        // Save User (which cascaded saves UserPreference)
         repository.save(user);
 
         var jwtToken = jwtService.generateToken(user);
@@ -65,16 +68,19 @@ public class AuthService {
                 )
         );
 
-        // If we reach here, user is authenticated
         var user = repository.findByEmail(request.getEmail())
                 .orElseThrow();
 
         var jwtToken = jwtService.generateToken(user);
-        
+
         return AuthResponse.builder()
                 .token(jwtToken)
                 .email(user.getEmail())
                 .fullName(user.getFullName())
                 .build();
+    }
+
+    private Integer orDefault(Integer value, Integer fallback) {
+        return value != null ? value : fallback;
     }
 }
