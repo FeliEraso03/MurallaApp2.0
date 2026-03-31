@@ -1,20 +1,11 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Navbar } from '../components/Navbar';
 import { IconLayers, IconCode } from '../components/Icons';
 
 export const AboutUs = () => {
     return (
         <div className="landing-container secondary-page">
-            <nav className="navbar">
-                <div className="navbar-brand">
-                    MURALLA <span className="brand-tag">2.0</span>
-                </div>
-                <div className="navbar-links">
-                    <Link to="/" className="nav-link">Home</Link>
-                    <Link to="/instructions" className="nav-link">Instrucciones</Link>
-                    <Link to="/about" className="nav-link active">Acerca de</Link>
-                </div>
-            </nav>
+            <Navbar activePage="about" />
 
             <div className="page-content">
                 <div className="glass-container page-box">

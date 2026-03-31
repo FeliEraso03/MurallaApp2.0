@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Navbar } from '../components/Navbar';
 
 // ── SVG Icons ──────────────────────────────────────────────
 const IconStep = ({ num }) => (
@@ -13,16 +13,7 @@ const IconStep = ({ num }) => (
 export const Instructions = () => {
     return (
         <div className="landing-container secondary-page">
-            <nav className="navbar">
-                <div className="navbar-brand">
-                    MURALLA <span className="brand-tag">2.0</span>
-                </div>
-                <div className="navbar-links">
-                    <Link to="/" className="nav-link">Home</Link>
-                    <Link to="/instructions" className="nav-link active">Instrucciones</Link>
-                    <Link to="/about" className="nav-link">Acerca de</Link>
-                </div>
-            </nav>
+            <Navbar activePage="instructions" />
 
             <div className="page-content">
                 <div className="glass-container page-box">

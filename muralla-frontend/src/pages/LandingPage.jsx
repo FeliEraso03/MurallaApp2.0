@@ -3,46 +3,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import '../App.css';
 import { IconScience, IconSafe, IconCpu, IconMap, IconDatabase } from '../components/Icons';
 import { useAuth } from '../utils/authContext';
+import { Navbar } from '../components/Navbar';
 
 export const LandingPage = () => {
     const navigate = useNavigate();
     const { user, logout } = useAuth();
     return (
         <div className="landing-container">
-            {/* Navbar */}
-            <nav className="navbar">
-                <div className="navbar-brand">
-                    MURALLA <span className="brand-tag">2.0</span>
-                </div>
-                <div className="navbar-links">
-                    <Link to="/" className="nav-link active">Home</Link>
-                    <Link to="/instructions" className="nav-link">Instrucciones</Link>
-                    <Link to="/about" className="nav-link">Acerca de</Link>
-                    {user ? (
-                        <>
-                            <Link to="/editor" className="nav-link" style={{color:'var(--orange)',fontWeight:600}}>Editor</Link>
-                            <button
-                                onClick={() => { logout(); }}
-                                className="nav-link"
-                                style={{background:'none',border:'none',cursor:'pointer',padding:0,color:'rgba(255,255,255,0.5)'}}
-                            >
-                                Cerrar sesión
-                            </button>
-                        </>
-                    ) : (
-                        <Link
-                            to="/login"
-                            style={{
-                                background:'linear-gradient(135deg,var(--orange),#e55d02)',
-                                color:'white', padding:'8px 18px', borderRadius:'8px',
-                                textDecoration:'none', fontWeight:700, fontSize:'0.88rem',
-                            }}
-                        >
-                            Iniciar sesión
-                        </Link>
-                    )}
-                </div>
-            </nav>
+            <Navbar activePage="home" />
 
             {/* Hero Section */}
             <div className="hero-section" style={{ backgroundImage: "url('/assets/cartagena.jpg')" }}>

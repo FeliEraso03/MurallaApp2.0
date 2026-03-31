@@ -274,7 +274,7 @@ export function RegisterPage() {
               className="auth-submit-btn"
               disabled={loading}
             >
-              {loading ? <><span className="auth-spinner" /> Creando cuenta...</> : 'Crear cuenta gratis →'}
+              {loading ? <><span className="auth-spinner" /> Creando cuenta...</> : 'Crear cuenta y configurar mis preferencias →'}
             </button>
           </form>
 

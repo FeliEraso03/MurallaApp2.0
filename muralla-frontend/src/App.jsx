@@ -4,6 +4,8 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { MapGraphEditor } from './components/MapGraphEditor';
 import { ElementModal } from './components/ElementModal';
 import { parseResolveGraphOutput } from './utils/Wdg2PnsParser';
+import { useAuth } from './utils/authContext';
+import { Link } from 'react-router-dom';
 import './App.css';
 
 const CENTRO_HISTORICO = { lat: 10.425248, lng: -75.549548 };
@@ -77,6 +79,8 @@ function App() {
   const [isSidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [activeTab, setActiveTab] = useState('planner'); 
+  
+  const { user } = useAuth();
 
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
@@ -438,9 +442,22 @@ function App() {
           <IconSearch />
           <input type="text" placeholder="Buscar lugar en Cartagena..." />
         </div>
-        <div className="topbar-stats">
+        <div className="topbar-stats" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
           <span className="stat-chip">{nodes.length} <small>nodos</small></span>
           <span className="stat-chip">{edges.length} <small>aristas</small></span>
+          
+          {user && (
+            <Link to="/preferences" title="Mi perfil de viajero" style={{
+              width: '36px', height: '36px', borderRadius: '50%',
+              background: 'linear-gradient(135deg, var(--orange), #e55d02)',
+              color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              textDecoration: 'none', fontWeight: 'bold', fontSize: '1.1rem',
+              boxShadow: '0 0 10px rgba(247, 127, 0, 0.4)', border: '2px solid rgba(255,255,255,0.1)',
+              marginLeft: '10px'
+            }}>
+              {user.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'}
+            </Link>
+          )}
         </div>
       </header>
 
