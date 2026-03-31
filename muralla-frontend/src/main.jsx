@@ -8,6 +8,7 @@ import { Instructions } from './pages/Instructions.jsx';
 import { LoginPage } from './pages/LoginPage.jsx';
 import { RegisterPage } from './pages/RegisterPage.jsx';
 import { PreferencesPage } from './pages/PreferencesPage.jsx';
+import { OAuth2CallbackPage } from './pages/OAuth2CallbackPage.jsx';
 import { AuthProvider, useAuth } from './utils/authContext.jsx';
 import './App.css';
 import './pages.css';
@@ -48,6 +49,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           {/* Guest-only auth pages */}
           <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
           <Route path="/register" element={<GuestRoute><RegisterPage /></GuestRoute>} />
+
+          {/* OAuth2 callback — always public, handles Google redirect */}
+          <Route path="/oauth2-callback" element={<OAuth2CallbackPage />} />
 
           {/* Protected: preferences wizard (right after register) */}
           <Route path="/preferences" element={
