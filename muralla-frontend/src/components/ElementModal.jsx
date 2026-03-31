@@ -100,7 +100,7 @@ export const ElementModal = ({ isOpen, type, initialData, editMode, onSave, onCa
                 <div className="modal-actions">
                     {editMode && onDelete && (
                         <button className="btn-danger" onClick={onDelete}>
-                            🗑️ Eliminar
+                            Eliminar
                         </button>
                     )}
                     <div className="modal-actions-right">

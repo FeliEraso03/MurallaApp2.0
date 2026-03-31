@@ -39,7 +39,7 @@ export const LandingPage = () => {
                         <div>
                             <p style={{fontSize: '1.2rem', color: 'var(--text-muted)', lineHeight: '1.8'}}>
                                 El <strong>Tourist Trip Design Problem (TTDP)</strong> es un reto de optimización que busca la ruta perfecta considerando intereses, tiempo y presupuesto. 
-                                En MurallaApp, enfrentamos los retos del Centro Histórico (calles estrechas, alta densidad y riesgos de emergencia) para garantizar evacuaciones eficientes y recorridos seguros.
+                                En Muralla App, enfrentamos los retos del Centro Histórico (calles estrechas, alta densidad y riesgos de emergencia) para garantizar evacuaciones eficientes y recorridos seguros.
                                 <br/><br/>
                                 Utilizando el motor <strong>P-graph</strong>, nuestra plataforma no solo calcula el camino más corto, sino que evalúa la <strong>utilidad social y turística</strong> de cada nodo, ofreciendo una experiencia personalizada y segura.
                             </p>
@@ -102,7 +102,7 @@ export const LandingPage = () => {
                     <div>
                         <h2 style={{fontSize: '2.5rem', fontWeight: '800', marginBottom: '1.5rem'}}>Impacto Social y Urbano</h2>
                         <p style={{fontSize: '1.1rem', lineHeight: '1.8', opacity: 0.8, marginBottom: '2rem'}}>
-                            No solo somos una herramienta de mapas. MurallaApp busca transformar la seguridad de Cartagena brindando a los tomadores de decisiones datos reales sobre:
+                            No solo somos una herramienta de mapas. Muralla App busca transformar la seguridad de Cartagena brindando a los tomadores de decisiones datos reales sobre:
                         </p>
                         <ul style={{listStyle: 'none', padding: 0}}>
                             <li style={{marginBottom: '1rem', display: 'flex', gap: '1rem'}}>

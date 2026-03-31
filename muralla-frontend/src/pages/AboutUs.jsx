@@ -1,6 +1,8 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
 import { IconLayers, IconCode } from '../components/Icons';
+import { User } from 'lucide-react';
 
 export const AboutUs = () => {
     return (
@@ -9,7 +11,7 @@ export const AboutUs = () => {
 
             <div className="page-content">
                 <div className="glass-container page-box">
-                    <h1 className="title">Sobre el Proyecto <span className="brand-tag">MURALLA GRAPH</span></h1>
+                    <h1 className="title">Sobre el Proyecto <span className="brand-tag">Muralla App</span></h1>
                     
                     <div className="about-text">
                         <h3 className="section-subtitle">Importancia del Proyecto</h3>
@@ -71,7 +73,9 @@ export const AboutUs = () => {
                                 { name: "Juan Felipe Eraso", role: "Software Engineer / Backend Logic" }
                             ].map((m, i) => (
                                 <div key={i} className="team-card glass-container" style={{padding: '2rem', textAlign: 'center', minWidth: '280px', border: '1px solid var(--orange)'}}>
-                                    <div style={{fontSize: '3.5rem', marginBottom: '1rem'}}>👨‍💻</div>
+                                    <div style={{display: 'flex', justifyContent: 'center', marginBottom: '1rem'}}>
+                                        <User size={48} color="var(--orange)" />
+                                    </div>
                                     <h4 style={{fontSize: '1.4rem', color: 'white', marginBottom: '0.5rem'}}>{m.name}</h4>
                                     <p style={{fontSize: '1rem', color: 'var(--orange)', fontWeight: '600'}}>{m.role}</p>
                                 </div>
@@ -82,7 +86,7 @@ export const AboutUs = () => {
                     <div className="collab-section" style={{marginTop: '4rem', padding: '2rem', background: 'rgba(255,255,255,0.02)', borderRadius: '20px'}}>
                         <h3 style={{fontSize: '1.5rem', marginBottom: '1.5rem', opacity: 0.9}}>Agradecimientos y Colaboradores Anteriores</h3>
                         <p style={{fontSize: '1rem', opacity: 0.7, marginBottom: '1.5rem'}}>
-                            El proyecto MurallaGraph nació del esfuerzo de un grupo dedicado de estudiantes e investigadores. Agradecemos su contribución inicial en las fases de análisis y prototipado:
+                            El proyecto Muralla App nació del esfuerzo de un grupo dedicado de estudiantes e investigadores. Agradecemos su contribución inicial en las fases de análisis y prototipado:
                         </p>
                         <div style={{display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem'}}>
                             <div style={{flex: 1, minWidth: '200px'}}>

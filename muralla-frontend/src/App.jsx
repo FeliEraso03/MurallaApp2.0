@@ -118,16 +118,16 @@ function App() {
         data: {
           type: 'FeatureCollection',
           features: [
-            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5495, 10.4235] }, properties: { name: '🏰 Torre del Reloj', type: 'monument' } },
-            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5510, 10.4243] }, properties: { name: '⛪ Plaza San Pedro Claver', type: 'plaza' } },
-            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5515, 10.4258] }, properties: { name: '🏛️ Palacio de la Inquisición', type: 'museum' } },
-            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5504, 10.4265] }, properties: { name: '🌳 Plaza de Bolívar', type: 'plaza' } },
-            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5528, 10.4245] }, properties: { name: '🍽️ Plaza Santo Domingo', type: 'plaza' } },
-            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5460, 10.4215] }, properties: { name: '🎨 Barrio Getsemaní', type: 'culture' } },
-            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5482, 10.4222] }, properties: { name: '🍻 Plazuela de la Trinidad', type: 'plaza' } },
-            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5520, 10.4285] }, properties: { name: '🏫 Las Bóvedas', type: 'history' } },
-            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5398, 10.4225] }, properties: { name: '⛰️ Castillo de San Felipe', type: 'fortress' } },
-            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5455, 10.4261] }, properties: { name: '🛍️ Mercado de Bazurto', type: 'local' } }
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5495, 10.4235] }, properties: { name: 'Torre del Reloj', type: 'monument' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5510, 10.4243] }, properties: { name: 'Plaza San Pedro Claver', type: 'plaza' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5515, 10.4258] }, properties: { name: 'Palacio de la Inquisición', type: 'museum' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5504, 10.4265] }, properties: { name: 'Plaza de Bolívar', type: 'plaza' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5528, 10.4245] }, properties: { name: 'Plaza Santo Domingo', type: 'plaza' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5460, 10.4215] }, properties: { name: 'Barrio Getsemaní', type: 'culture' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5482, 10.4222] }, properties: { name: 'Plazuela de la Trinidad', type: 'plaza' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5520, 10.4285] }, properties: { name: 'Las Bóvedas', type: 'history' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5398, 10.4225] }, properties: { name: 'Castillo de San Felipe', type: 'fortress' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5455, 10.4261] }, properties: { name: 'Mercado de Bazurto', type: 'local' } }
           ]
         }
       });
@@ -179,21 +179,21 @@ function App() {
         return res.json();
       })
       .then(data => {
-        const dynamicFeatures = data.elements
-          .filter(el => el.tags && el.tags.name) // Solo lugares que tengan nombre oficial
-          .map(el => {
-            let icon = '📍';
-            if (el.tags.amenity === 'restaurant') icon = '🍽️';
-            else if (el.tags.amenity === 'cafe') icon = '☕';
-            else if (el.tags.amenity === 'bar') icon = '🍹';
-            else if (el.tags.tourism === 'museum') icon = '🎭';
-            
-            return {
-              type: 'Feature',
-              geometry: { type: 'Point', coordinates: [el.lon, el.lat] },
-              properties: { name: `${icon} ${el.tags.name}` }
-            };
-          });
+            const dynamicFeatures = data.elements
+              .filter(el => el.tags && el.tags.name) // Solo lugares que tengan nombre oficial
+              .map(el => {
+                let prefix = '[POl]';
+                if (el.tags.amenity === 'restaurant') prefix = '[Restaurante]';
+                else if (el.tags.amenity === 'cafe') prefix = '[Cafe]';
+                else if (el.tags.amenity === 'bar') prefix = '[Bar]';
+                else if (el.tags.tourism === 'museum') prefix = '[Museo]';
+                
+                return {
+                  type: 'Feature',
+                  geometry: { type: 'Point', coordinates: [el.lon, el.lat] },
+                  properties: { name: `${prefix} ${el.tags.name}` }
+                };
+              });
 
         m.addSource('osm-dynamic-pois', {
           type: 'geojson',
@@ -544,7 +544,7 @@ function App() {
           {isSidebarOpen ? <IconX /> : <IconMenu />}
         </button>
         <div className="topbar-brand">
-          <span className="brand-name">Muralla</span>
+          <span className="brand-name">Muralla App</span>
           <span className="brand-tag">2.0</span>
         </div>
         <div className="topbar-search">
@@ -596,10 +596,10 @@ function App() {
                 <div className="field-group">
                   <label>Preferencia de experiencia</label>
                   <select>
-                    <option>🏛️ Histórico Colonial</option>
-                    <option>🍽️ Gastronómico Marítimo</option>
-                    <option>⛪ Religioso Cultural</option>
-                    <option>🌊 Turismo Playero</option>
+                    <option>Histórico Colonial</option>
+                    <option>Gastronómico Marítimo</option>
+                    <option>Religioso Cultural</option>
+                    <option>Turismo Playero</option>
                   </select>
                 </div>
                 <button className="cta-btn" onClick={generateRoutes} disabled={isGenerating}>

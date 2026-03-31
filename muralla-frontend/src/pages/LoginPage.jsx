@@ -73,7 +73,7 @@ export function LoginPage() {
         <div className="auth-illustration" />
         <div className="auth-panel-left-content">
           <div className="auth-brand">
-            <span className="auth-brand-name">Muralla</span>
+            <span className="auth-brand-name">Muralla App</span>
             <span className="auth-brand-tag">2.0</span>
           </div>
           <h1 className="auth-tagline">
@@ -104,7 +104,7 @@ export function LoginPage() {
         <div className="auth-form-card">
           {/* Mobile brand */}
           <div className="auth-brand" style={{ marginBottom: '1.5rem', justifyContent: 'center' }}>
-            <span className="auth-brand-name">Muralla</span>
+            <span className="auth-brand-name">Muralla App</span>
             <span className="auth-brand-tag">2.0</span>
           </div>
 

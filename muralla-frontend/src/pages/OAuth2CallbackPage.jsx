@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../utils/authContext';
+import { AlertCircle } from 'lucide-react';
 import '../auth.css';
 
 /**
@@ -70,7 +71,7 @@ export function OAuth2CallbackPage() {
           </>
         ) : (
           <>
-            <div style={{ fontSize: '2rem' }}>⚠️</div>
+            <div style={{ marginBottom: '1rem' }}><AlertCircle size={40} color="var(--orange)" /></div>
             <p style={{ color: '#ff8080', fontSize: '0.95rem', maxWidth: '320px' }}>{error}</p>
             <p style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)' }}>
               Redirigiendo al inicio de sesión...

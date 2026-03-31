@@ -9,7 +9,7 @@ export function Navbar({ activePage }) {
     return (
         <nav className="navbar" style={{ padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--navy)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
             <div className="navbar-brand">
-                MURALLA <span className="brand-tag">2.0</span>
+                Muralla App <span className="brand-tag">2.0</span>
             </div>
             <div className="navbar-links" style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
                 <Link to="/" className={`nav-link ${activePage === 'home' ? 'active' : ''}`}>Home</Link>
