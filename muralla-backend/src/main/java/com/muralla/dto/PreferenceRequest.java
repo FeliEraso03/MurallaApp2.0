@@ -12,9 +12,13 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class PreferenceRequest {
 
+    private String  fullName; // Non-sensitive profile data
+
     private Integer defaultTimeAvailableHours;
     private String  mobilityType;
     private String  groupType;
+    private String  touristType;
+    private String  ageRange;
     private String  profilePictureUrl;
 
     private Integer interestCulture;

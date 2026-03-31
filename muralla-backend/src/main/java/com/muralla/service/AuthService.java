@@ -30,6 +30,8 @@ public class AuthService {
                 .defaultTimeAvailableHours(orDefault(request.getDefaultTimeAvailableHours(), 4))
                 .mobilityType(request.getMobilityType() != null ? request.getMobilityType() : "WALK")
                 .groupType(request.getGroupType() != null ? request.getGroupType() : "SOLO")
+                .touristType(request.getTouristType())
+                .ageRange(request.getAgeRange())
                 .interestCulture(orDefault(request.getInterestCulture(), 5))
                 .interestReligion(orDefault(request.getInterestReligion(), 5))
                 .interestGastronomy(orDefault(request.getInterestGastronomy(), 5))

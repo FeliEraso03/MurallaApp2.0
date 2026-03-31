@@ -1,79 +1,82 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../utils/authContext';
+import { Landmark, Church, Utensils, TreePine, Palette, Map, User, HeartHandshake, Users, Footprints, Car, Clock } from 'lucide-react';
 import '../auth.css';
 
 // ── Interest categories definition ───────────────────
 const INTERESTS = [
   {
     key: 'interestCulture',
-    icon: '🏛️',
+    icon: <Landmark size={20} />,
     label: 'Cultural e Histórico',
     desc: 'Murallas, museos, plazas históricas y patrimonio colonial',
   },
   {
     key: 'interestReligion',
-    icon: '⛪',
+    icon: <Church size={20} />,
     label: 'Religioso y Espiritual',
     desc: 'Iglesias, conventos y sitios de devoción histórica',
   },
   {
     key: 'interestGastronomy',
-    icon: '🍽️',
+    icon: <Utensils size={20} />,
     label: 'Gastronómico',
     desc: 'Restaurantes locales, mercados y gastronomía caribeña',
   },
   {
     key: 'interestNature',
-    icon: '🌿',
+    icon: <TreePine size={20} />,
     label: 'Naturaleza y Espacios Abiertos',
     desc: 'Plazas, parques, miradores y espacios al aire libre',
   },
   {
     key: 'interestArts',
-    icon: '🎭',
+    icon: <Palette size={20} />,
     label: 'Arte Vivo y Artesanías',
     desc: 'Arte mural, artesanías, galerías y cultura bohemia en Getsemaní',
   },
   {
     key: 'interestAdventure',
-    icon: '🗺️',
+    icon: <Map size={20} />,
     label: 'Exploración y Aventura',
     desc: 'Callejones, barrios emergentes y rutas poco convencionales',
   },
 ];
 
 const TIME_OPTIONS = [
+  { value: 1, label: '1h', desc: 'Rápido' },
   { value: 2, label: '2h', desc: 'Express' },
   { value: 4, label: '4h', desc: 'Estándar' },
-  { value: 6, label: '6h', desc: 'Completo' },
-  { value: 8, label: '8h+', desc: 'Día entero' },
+  { value: 6, label: '6h', desc: 'Extendido' },
+  { value: 8, label: '8h', desc: 'Completo' },
+  { value: 10, label: '10h+', desc: 'Día entero' },
 ];
 
 const GROUP_OPTIONS = [
-  { value: 'SOLO',   icon: '🚶', label: 'Solo' },
-  { value: 'COUPLE', icon: '👫', label: 'Pareja' },
-  { value: 'FAMILY', icon: '👨‍👩‍👧', label: 'Familia' },
-  { value: 'GROUP',  icon: '👥', label: 'Grupo' },
+  { value: 'SOLO',   icon: <User size={18} />, label: 'Solo' },
+  { value: 'COUPLE', icon: <HeartHandshake size={18} />, label: 'Pareja' },
+  { value: 'FAMILY', icon: <Users size={18} />, label: 'Familia' },
+  { value: 'GROUP',  icon: <Users size={18} />, label: 'Grupo' },
 ];
 
 const MOBILITY_OPTIONS = [
-  { value: 'WALK',  icon: '🚶', label: 'A pie', desc: 'Recorrido peatonal completo' },
-  { value: 'MULTI', icon: '🐎', label: 'Combinado', desc: 'Coche de caballos, tuk-tuk + caminata' },
+  { value: 'WALK',  icon: <Footprints size={18} />, label: 'A pie', desc: 'Recorrido peatonal completo' },
+  { value: 'MULTI', icon: <Car size={18} />, label: 'Combinado', desc: 'Coche de caballos, tuk-tuk + caminata' },
 ];
 
 // ── Traveler profile label ────────────────────────────
 function getTravelerProfile(interests) {
   const top = Object.entries(interests).reduce((a, b) => b[1] > a[1] ? b : a, ['', 0]);
   const map = {
-    interestCulture:     { label: 'Explorador Cultural', icon: '🏛️' },
-    interestReligion:    { label: 'Viajero Espiritual',  icon: '⛪' },
-    interestGastronomy:  { label: 'Gastrónomo Viajero', icon: '🍽️' },
-    interestNature:      { label: 'Amante de la Naturaleza', icon: '🌿' },
-    interestArts:        { label: 'Bohemio Artístico',   icon: '🎭' },
-    interestAdventure:   { label: 'Aventurero Urbano',   icon: '🗺️' },
+    interestCulture:     { label: 'Explorador Cultural', icon: <Landmark size={24} /> },
+    interestReligion:    { label: 'Viajero Espiritual',  icon: <Church size={24} /> },
+    interestGastronomy:  { label: 'Gastrónomo Viajero', icon: <Utensils size={24} /> },
+    interestNature:      { label: 'Amante de la Naturaleza', icon: <TreePine size={24} /> },
+    interestArts:        { label: 'Bohemio Artístico',   icon: <Palette size={24} /> },
+    interestAdventure:   { label: 'Aventurero Urbano',   icon: <Map size={24} /> },
   };
-  return map[top[0]] || { label: 'Viajero Completo', icon: '✨' };
+  return map[top[0]] || { label: 'Viajero Completo', icon: <Map size={24} /> };
 }
 
 // ── Stepper ───────────────────────────────────────────
@@ -288,7 +291,9 @@ export function PreferencesPage() {
 
             {/* Time */}
             <div className="pref-options-row">
-              <label className="pref-option-label">⏰ ¿Cuánto tiempo tienes disponible?</label>
+              <label className="pref-option-label" style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                <Clock size={18} /> ¿Cuánto tiempo tienes disponible?
+              </label>
               <div className="pref-time-grid">
                 {TIME_OPTIONS.map(t => (
                   <button
@@ -306,7 +311,9 @@ export function PreferencesPage() {
 
             {/* Group */}
             <div className="pref-options-row">
-              <label className="pref-option-label">👥 ¿Con quién viajas?</label>
+              <label className="pref-option-label" style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                <Users size={18} /> ¿Con quién viajas?
+              </label>
               <div className="pref-group-grid">
                 {GROUP_OPTIONS.map(g => (
                   <button
@@ -324,7 +331,9 @@ export function PreferencesPage() {
 
             {/* Mobility */}
             <div className="pref-options-row">
-              <label className="pref-option-label">🚶 ¿Cómo prefieres moverte?</label>
+              <label className="pref-option-label" style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                <Footprints size={18} /> ¿Cómo prefieres moverte?
+              </label>
               <div className="pref-mobility-grid">
                 {MOBILITY_OPTIONS.map(m => (
                   <button
@@ -397,15 +406,15 @@ export function PreferencesPage() {
                       {i.icon} {i.label}
                     </div>
                   ))}
-                <div className="pref-summary-chip">
-                  ⏰ {logistics.defaultTimeAvailableHours}h disponibles
+                <div className="pref-summary-chip" style={{display: 'flex', alignItems: 'center', gap: '6px'}}>
+                  <Clock size={16} /> {logistics.defaultTimeAvailableHours}h disponibles
                 </div>
-                <div className="pref-summary-chip">
-                  {GROUP_OPTIONS.find(g => g.value === logistics.groupType)?.icon}&nbsp;
+                <div className="pref-summary-chip" style={{display: 'flex', alignItems: 'center', gap: '6px'}}>
+                  {GROUP_OPTIONS.find(g => g.value === logistics.groupType)?.icon}
                   {GROUP_OPTIONS.find(g => g.value === logistics.groupType)?.label}
                 </div>
-                <div className="pref-summary-chip">
-                  {MOBILITY_OPTIONS.find(m => m.value === logistics.mobilityType)?.icon}&nbsp;
+                <div className="pref-summary-chip" style={{display: 'flex', alignItems: 'center', gap: '6px'}}>
+                  {MOBILITY_OPTIONS.find(m => m.value === logistics.mobilityType)?.icon}
                   {MOBILITY_OPTIONS.find(m => m.value === logistics.mobilityType)?.label}
                 </div>
               </div>
@@ -423,10 +432,11 @@ export function PreferencesPage() {
                 className="pref-next-btn"
                 onClick={handleFinish}
                 disabled={loading}
+                style={{display: 'flex', alignItems: 'center', gap: '8px'}}
               >
                 {loading
                   ? <><span className="auth-spinner" /> Guardando...</>
-                  : '¡Comenzar a explorar! 🗺️'}
+                  : <>¡Comenzar a explorar! <Map size={18} /></>}
               </button>
             </div>
           </>

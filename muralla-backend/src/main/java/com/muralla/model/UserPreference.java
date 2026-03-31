@@ -31,6 +31,12 @@ public class UserPreference {
     /** Group composition: "SOLO" | "COUPLE" | "FAMILY" | "GROUP" */
     private String groupType;
 
+    /** Demographic analysis: "LOCAL" | "NATIONAL" | "INTERNATIONAL" */
+    private String touristType;
+
+    /** Age range: "18-25" | "26-35" | "36-50" | "50+" */
+    private String ageRange;
+
     // ── Interest weights 1-10 ──────────────────────────
 
     /** Historical / Colonial cultural sites */

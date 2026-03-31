@@ -374,7 +374,7 @@
    ════════════════════════════════════════════════════ */
 
 .pref-shell {
-  min-height: 100vh;
+  height: 100vh;
   width: 100vw;
   background: var(--navy);
   display: flex;
@@ -398,7 +398,7 @@
 
 .pref-card {
   width: 100%;
-  max-width: 680px;
+  max-width: 860px;
   background: var(--navy-mid);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 20px;
@@ -805,12 +805,51 @@
   gap: 8px;
 }
 
+.pref-next-btn:active { transform: translateY(1px); }
+
 .pref-next-btn:hover:not(:disabled) {
   transform: translateY(-1px);
   box-shadow: 0 6px 24px rgba(247, 127, 0, 0.5);
 }
 
 .pref-next-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+/* ── Profile Page Specifics ────────────────────── */
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 2.5rem;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+}
+
+@media (max-width: 600px) {
+  .profile-header {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+.auth-secondary-btn:hover {
+  background: rgba(247, 127, 0, 0.1) !important;
+  border-color: var(--orange) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(247, 127, 0, 0.15);
+}
+
+.hidden-mobile {
+  display: none !important;
+}
+
+@media (min-width: 900px) {
+  .hidden-mobile {
+    display: flex !important;
+  }
+}
+
 
 /* ── Mobile responsive ───────────────────────────*/
 @media (max-width: 640px) {

@@ -22,7 +22,7 @@ export function Navbar({ activePage }) {
                         
                         {/* Profile Logo / Avatar */}
                         <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <Link to="/preferences" title="Ir a mi perfil / Preferencias" style={{
+                            <Link to="/profile" title="Ir a mi perfil / Preferencias" style={{
                                 width: '40px', height: '40px', borderRadius: '50%',
                                 background: 'linear-gradient(135deg, var(--orange), #e55d02)',
                                 color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',

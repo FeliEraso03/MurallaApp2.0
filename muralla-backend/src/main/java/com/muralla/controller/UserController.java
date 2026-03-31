@@ -47,6 +47,9 @@ public class UserController {
         if (req.getProfilePictureUrl() != null) {
             user.setProfilePictureUrl(req.getProfilePictureUrl());
         }
+        if (req.getFullName() != null) {
+            user.setFullName(req.getFullName());
+        }
 
         if (req.getDefaultTimeAvailableHours() != null)
             pref.setDefaultTimeAvailableHours(req.getDefaultTimeAvailableHours());
@@ -54,6 +57,10 @@ public class UserController {
             pref.setMobilityType(req.getMobilityType());
         if (req.getGroupType() != null)
             pref.setGroupType(req.getGroupType());
+        if (req.getTouristType() != null)
+            pref.setTouristType(req.getTouristType());
+        if (req.getAgeRange() != null)
+            pref.setAgeRange(req.getAgeRange());
         if (req.getInterestCulture() != null)
             pref.setInterestCulture(req.getInterestCulture());
         if (req.getInterestReligion() != null)

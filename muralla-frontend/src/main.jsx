@@ -8,6 +8,7 @@ import { Instructions } from './pages/Instructions.jsx';
 import { LoginPage } from './pages/LoginPage.jsx';
 import { RegisterPage } from './pages/RegisterPage.jsx';
 import { PreferencesPage } from './pages/PreferencesPage.jsx';
+import { UserProfilePage } from './pages/UserProfilePage.jsx';
 import { OAuth2CallbackPage } from './pages/OAuth2CallbackPage.jsx';
 import { AuthProvider, useAuth } from './utils/authContext.jsx';
 import './App.css';
@@ -61,6 +62,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           {/* Protected: main editor */}
           <Route path="/editor" element={
             <ProtectedRoute><App /></ProtectedRoute>
+          } />
+
+          {/* Protected: User Profile */}
+          <Route path="/profile" element={
+            <ProtectedRoute><UserProfilePage /></ProtectedRoute>
           } />
 
           {/* Fallback */}

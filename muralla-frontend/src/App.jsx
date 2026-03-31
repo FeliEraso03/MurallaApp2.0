@@ -174,7 +174,10 @@ function App() {
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: 'data=' + encodeURIComponent(overpassQuery)
       })
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error('Servidor remoto devolvió ' + res.status);
+        return res.json();
+      })
       .then(data => {
         const dynamicFeatures = data.elements
           .filter(el => el.tags && el.tags.name) // Solo lugares que tengan nombre oficial
@@ -553,7 +556,7 @@ function App() {
           <span className="stat-chip">{edges.length} <small>aristas</small></span>
           
           {user && (
-            <Link to="/preferences" title="Mi perfil de viajero" style={{
+            <Link to="/profile" title="Mi perfil de viajero" style={{
               width: '36px', height: '36px', borderRadius: '50%',
               background: 'linear-gradient(135deg, var(--orange), #e55d02)',
               color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',

@@ -343,6 +343,9 @@ export const MapGraphEditor = ({
         if (!map) return;
 
         const onClick = (e) => {
+            // Stop if map hasn't finished drawing the core graph layers
+            if (!map.getLayer('lyr-nodes') || !map.getLayer('lyr-edges')) return;
+
             // 1. Check if click hits a node
             const nodeHits = map.queryRenderedFeatures(e.point, { layers: ['lyr-nodes'] });
             if (nodeHits.length > 0) {

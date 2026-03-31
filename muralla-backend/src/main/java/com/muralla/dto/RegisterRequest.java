@@ -19,6 +19,8 @@ public class RegisterRequest {
     private Integer defaultTimeAvailableHours;
     private String  mobilityType;
     private String  groupType;
+    private String  touristType;
+    private String  ageRange;
     private Integer interestCulture;
     private Integer interestReligion;
     private Integer interestGastronomy;
