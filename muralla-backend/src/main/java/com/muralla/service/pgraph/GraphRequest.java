@@ -9,6 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class GraphRequest {
+    private String algorithmMode;
+    private String sourceNodeId;
+    private String targetNodeId;
     private List<PnsNode> nodes;
     private List<PnsEdge> edges;
 }

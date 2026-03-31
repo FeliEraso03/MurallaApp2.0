@@ -23,19 +23,12 @@ public class RouteController {
      * Requires an authenticated user (Bearer JWT).
      */
     @PostMapping("/generate")
-    @PreAuthorize("hasAuthority('USER') or hasAuthority('ADMIN')")
     public ResponseEntity<List<Object>> generateCustomRoute(@RequestBody GraphRequest request) {
-        
-        // 1. Generate Maximal Structure (MSG)
-        PGraphAlgorithmService.GraphMemory memory = pGraphService.generateMaximalStructure(request.getNodes(), request.getEdges());
-        
-        // 2. Generate Solution Structures (SSG)
-        List<PGraphAlgorithmService.PathResult> ssgPaths = pGraphService.generateSolutionStructures(memory);
-        
-        // 3. Accelerated Branch and Bound (ABB)
-        List<Object> kBestRoutes = pGraphService.executeABB(ssgPaths, memory);
-        
-        return ResponseEntity.ok(kBestRoutes);
+        if ("FORD_FULKERSON".equalsIgnoreCase(request.getAlgorithmMode())) {
+            return ResponseEntity.ok(pGraphService.executeFordFulkerson(request));
+        } else {
+            return ResponseEntity.ok(pGraphService.executeDijkstra(request));
+        }
     }
 
     /**

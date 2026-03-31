@@ -1,0 +1,242 @@
+/* Pages CSS - V2 Aesthetic */
+.landing-container {
+    min-height: 100vh;
+    background: var(--navy);
+    color: var(--text-inverse);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.secondary-page {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy-mid) 100%);
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 3rem;
+    background: rgba(13, 27, 42, 0.6);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: white;
+}
+
+.brand-tag {
+    background: var(--orange);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 8px;
+    font-size: 0.8em;
+    font-weight: 700;
+}
+
+.navbar-links {
+    display: flex;
+    gap: 2rem;
+}
+
+.nav-link {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-weight: 500;
+    transition: 0.2s;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: var(--orange);
+}
+
+.hero-section {
+    min-height: 100vh;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-top: 80px;
+}
+
+.hero-overlay {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 2rem;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(0deg, var(--navy) 0%, rgba(13,27,42,0.6) 100%);
+}
+
+.hero-subtitle {
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.hero-title {
+    font-size: 4rem;
+    color: white;
+    font-weight: 800;
+    margin: 1rem 0;
+    line-height: 1.1;
+    padding: 1.5rem 3rem;
+}
+
+.glass-container {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border-radius: 20px;
+}
+
+.hero-buttons {
+    margin-top: 2rem;
+}
+
+.cta-btn.lg {
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    border-radius: 50px;
+}
+
+.cta-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    font-weight: 700;
+    transition: all 0.2s;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.cta-btn.primary {
+    background: linear-gradient(135deg, var(--orange), #ca6b06);
+    color: white;
+    box-shadow: 0 4px 15px rgba(247, 127, 0, 0.4);
+}
+.cta-btn.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(247, 127, 0, 0.6);
+}
+
+.cta-btn.outline {
+    background: transparent;
+    border: 2px solid white;
+    color: white;
+    margin-left: 1rem;
+}
+.cta-btn.outline:hover {
+    background: rgba(255,255,255,0.1);
+    transform: translateY(-2px);
+}
+
+.features-section {
+    padding: 6rem 3rem;
+    background: var(--navy);
+    position: relative;
+    z-index: 10;
+}
+
+.section-heading {
+    text-align: center;
+    color: white;
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 4rem;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.feature-card {
+    padding: 2.5rem;
+    text-align: center;
+    transition: transform 0.3s;
+}
+
+.feature-card:hover {
+    transform: translateY(-10px);
+}
+
+.feature-card .icon-large {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.feature-card h3 {
+    color: white;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.feature-card p {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+/* Secondary Pages */
+.page-content {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 120px 2rem 4rem 2rem; 
+}
+
+.page-box {
+    max-width: 900px;
+    width: 100%;
+    padding: 4rem;
+    color: white;
+}
+
+.page-box p {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+    color: #e5e9ef;
+}
+
+.page-box h3 {
+    color: var(--orange);
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 1.4rem;
+}
+
+.title {
+    font-size: 3rem;
+    color: white;
+    margin-bottom: 2rem;
+    font-weight: 800;
+}

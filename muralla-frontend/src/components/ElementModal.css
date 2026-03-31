@@ -21,7 +21,7 @@
   padding: 28px;
   border-radius: 16px;
   box-shadow: 0 24px 60px rgba(0,0,0,0.5);
-  width: 340px;
+  width: 380px;
   animation: modal-slide 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -76,19 +76,29 @@
 
 .modal-actions {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
   gap: 10px;
   margin-top: 22px;
 }
 
+.modal-actions-right {
+  display: flex;
+  gap: 10px;
+}
+
 .modal-actions button {
-  padding: 10px 20px;
+  padding: 10px 14px;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
   font-size: 0.88rem;
   transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
 .btn-cancel {
@@ -102,11 +112,21 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #f77f00, #e85d04);
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
   color: white;
-  box-shadow: 0 4px 12px rgba(247,127,0,0.3);
+  box-shadow: 0 4px 12px rgba(124,58,237,0.3);
 }
 .btn-primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(247,127,0,0.45);
+  box-shadow: 0 6px 16px rgba(124,58,237,0.45);
+}
+
+.btn-danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+.btn-danger:hover {
+  background: rgba(239, 68, 68, 0.25);
+  color: #fca5a5;
 }

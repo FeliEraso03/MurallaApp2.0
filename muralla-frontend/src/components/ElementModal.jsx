@@ -2,18 +2,17 @@ import React, { useState, useEffect } from 'react';
 import './ElementModal.css';
 
 /**
- * A reusable Modal component to input Node or Edge attributes.
+ * Modal to create or edit Node / Edge attributes.
+ * When `editMode` is true, shows a Delete button and pre-fills with `initialData`.
  */
-export const ElementModal = ({ isOpen, type, initialData, onSave, onCancel }) => {
+export const ElementModal = ({ isOpen, type, initialData, editMode, onSave, onCancel, onDelete }) => {
     
-    // State to hold the current form values
     const [formData, setFormData] = useState({});
 
     useEffect(() => {
         if (isOpen && initialData) {
             setFormData(initialData);
         } else {
-            // Reset to defaults if not provided
             if (type === 'NODE') {
                 setFormData({ type: 1, initialContent: 0, maximumCapacity: 100 });
             } else if (type === 'EDGE') {
@@ -28,18 +27,20 @@ export const ElementModal = ({ isOpen, type, initialData, onSave, onCancel }) =>
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
-            [name]: Number(value) // Cast to number since attributes are numeric
+            [name]: Number(value)
         }));
     };
 
-    const handleSave = () => {
-        onSave(formData);
-    };
+    const handleSave = () => onSave(formData);
+
+    const title = editMode
+        ? (type === 'NODE' ? `Editar ${initialData?.id || 'Nodo'}` : `Editar Arista ${initialData?.startNodeId ?? ''} → ${initialData?.endNodeId ?? ''}`)
+        : (type === 'NODE' ? 'Nuevo Nodo' : 'Nueva Conexión');
 
     return (
         <div className="modal-overlay">
             <div className="modal-content">
-                <h3>{type === 'NODE' ? 'Configurar Nodo' : 'Configurar Conexión'}</h3>
+                <h3>{title}</h3>
                 
                 <div className="modal-form">
                     {type === 'NODE' && (
@@ -65,6 +66,21 @@ export const ElementModal = ({ isOpen, type, initialData, onSave, onCancel }) =>
 
                     {type === 'EDGE' && (
                         <>
+                            {editMode && (
+                                <div className="form-group" style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.2)', padding: '10px', borderRadius: '8px' }}>
+                                    <span style={{ fontSize: '0.9rem', color: '#fff', fontWeight: 500 }}>
+                                        {formData.startNodeId} <span style={{color: '#06d6a0', margin: '0 8px'}}>➔</span> {formData.endNodeId}
+                                    </span>
+                                    <button 
+                                        type="button" 
+                                        className="btn-secondary"
+                                        style={{ padding: '6px 12px', fontSize: '0.8rem', background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', borderRadius: '4px', cursor: 'pointer' }}
+                                        onClick={() => setFormData(prev => ({ ...prev, startNodeId: prev.endNodeId, endNodeId: prev.startNodeId }))}
+                                    >
+                                        🔄 Invertir
+                                    </button>
+                                </div>
+                            )}
                             <div className="form-group">
                                 <label>Distancia / Peso Matemático</label>
                                 <input name="weight" type="number" min="0" step="0.1" value={formData.weight || 0} onChange={handleChange} />
@@ -82,8 +98,15 @@ export const ElementModal = ({ isOpen, type, initialData, onSave, onCancel }) =>
                 </div>
 
                 <div className="modal-actions">
-                    <button className="btn-cancel" onClick={onCancel}>Cancelar</button>
-                    <button className="btn-primary" onClick={handleSave}>Guardar</button>
+                    {editMode && onDelete && (
+                        <button className="btn-danger" onClick={onDelete}>
+                            🗑️ Eliminar
+                        </button>
+                    )}
+                    <div className="modal-actions-right">
+                        <button className="btn-cancel" onClick={onCancel}>Cancelar</button>
+                        <button className="btn-primary" onClick={handleSave}>Guardar</button>
+                    </div>
                 </div>
             </div>
         </div>

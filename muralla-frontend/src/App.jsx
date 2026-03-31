@@ -3,6 +3,7 @@ import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { MapGraphEditor } from './components/MapGraphEditor';
 import { ElementModal } from './components/ElementModal';
+import { parseResolveGraphOutput } from './utils/Wdg2PnsParser';
 import './App.css';
 
 const CENTRO_HISTORICO = { lat: 10.425248, lng: -75.549548 };
@@ -85,13 +86,18 @@ function App() {
   const [routeSolutions, setRouteSolutions] = useState([]);
   const [activeSolution, setActiveSolution] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [showGrid, setShowGrid] = useState(true);
+  const [showDirection, setShowDirection] = useState(false);
+  const [isDirected, setIsDirected] = useState(false);
+  const [algorithmMode, setAlgorithmMode] = useState('NONE'); // 'NONE' | 'DIJKSTRA' | 'FORD_FULKERSON'
+  const [algorithmSelectedNodes, setAlgorithmSelectedNodes] = useState([]);
 
   // Initialize MapLibre
   useEffect(() => {
     if (mapInstance) return;
     const m = new maplibregl.Map({
       container: mapContainer.current,
-      style: 'https://tiles.openfreemap.org/styles/liberty', 
+      style: 'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json', 
       center: [CENTRO_HISTORICO.lng, CENTRO_HISTORICO.lat],
       zoom: 16,
       maxBounds: BOUNDS
@@ -133,51 +139,212 @@ function App() {
   };
 
   const handleAddNode = (lat, lng) =>
-    setModalConfig({ isOpen: true, type: 'NODE', data: { lat, lng } });
+    setModalConfig({ isOpen: true, type: 'NODE', data: { lat, lng }, editMode: false });
 
   const handleSelectNode = (node) => {
-    if (graphMode !== 'ADD_EDGE') return;
-    if (!selectedNodeA) { setSelectedNodeA(node); return; }
-    if (selectedNodeA.id !== node.id) {
-      setModalConfig({ isOpen: true, type: 'EDGE', data: { startNodeId: selectedNodeA.id, endNodeId: node.id } });
+    // 1. Logic for Algorithm Selection Mode
+    if (algorithmMode !== 'NONE') {
+      setAlgorithmSelectedNodes(prev => {
+        if (prev.some(n => n.id === node.id)) return prev;
+        const next = [...prev, node].slice(-2);
+        return next;
+      });
+      return;
     }
-    setSelectedNodeA(null);
-    setGraphMode('IDLE');
+
+    // 2. Edge Creation Mode
+    if (graphMode === 'ADD_EDGE') {
+      if (!selectedNodeA) { setSelectedNodeA(node); return; }
+      if (selectedNodeA.id !== node.id) {
+        setModalConfig({ isOpen: true, type: 'EDGE', data: { startNodeId: selectedNodeA.id, endNodeId: node.id }, editMode: false });
+      }
+      setSelectedNodeA(null);
+      setGraphMode('IDLE');
+      return;
+    }
+
+    // 3. IDLE mode → Edit the node
+    if (graphMode === 'IDLE') {
+      const fullNode = nodes.find(n => n.id === node.id);
+      if (fullNode) {
+        setModalConfig({
+          isOpen: true,
+          type: 'NODE',
+          data: fullNode,
+          editMode: true,
+        });
+      }
+    }
+  };
+
+  const handleSelectEdge = (edgeIdx) => {
+    if (graphMode !== 'IDLE') return;
+    const edge = edges[edgeIdx];
+    if (!edge) return;
+    setModalConfig({
+      isOpen: true,
+      type: 'EDGE',
+      data: { ...edge, idx: edgeIdx },
+      editMode: true,
+    });
   };
 
   const handleModalSave = (formData) => {
-    if (modalConfig.type === 'NODE') {
-      setNodes(prev => [...prev, {
-        id: `Node${prev.length + 1}`,
-        lat: modalConfig.data.lat, lng: modalConfig.data.lng,
-        type: formData.type || 1,
-        initialContent: formData.initialContent || 0,
-        maximumCapacity: formData.maximumCapacity || 100,
-        enable: true
-      }]);
-    } else if (modalConfig.type === 'EDGE') {
-      setEdges(prev => [...prev, {
-        startNodeId: modalConfig.data.startNodeId,
-        endNodeId: modalConfig.data.endNodeId,
-        weight: formData.weight || 10,
-        capacity: formData.capacity || 50,
-        time: formData.time || 5,
-        enable: true
-      }]);
+    if (modalConfig.editMode) {
+      // ── EDIT existing element ──
+      if (modalConfig.type === 'NODE') {
+        setNodes(prev => prev.map(n =>
+          n.id === modalConfig.data.id
+            ? { ...n, type: formData.type, initialContent: formData.initialContent, maximumCapacity: formData.maximumCapacity }
+            : n
+        ));
+      } else if (modalConfig.type === 'EDGE') {
+        setEdges(prev => prev.map((e, i) =>
+          i === modalConfig.data.idx
+            ? { ...e, startNodeId: formData.startNodeId, endNodeId: formData.endNodeId, weight: formData.weight, capacity: formData.capacity, time: formData.time }
+            : e
+        ));
+      }
+    } else {
+      // ── CREATE new element ──
+      if (modalConfig.type === 'NODE') {
+        setNodes(prev => [...prev, {
+          id: `Node${prev.length + 1}`,
+          lat: modalConfig.data.lat, lng: modalConfig.data.lng,
+          type: formData.type || 1,
+          initialContent: formData.initialContent || 0,
+          maximumCapacity: formData.maximumCapacity || 100,
+          enable: true
+        }]);
+      } else if (modalConfig.type === 'EDGE') {
+        setEdges(prev => [...prev, {
+          startNodeId: modalConfig.data.startNodeId,
+          endNodeId: modalConfig.data.endNodeId,
+          weight: formData.weight || 10,
+          capacity: formData.capacity || 50,
+          time: formData.time || 5,
+          enable: true
+        }]);
+      }
     }
-    setModalConfig({ isOpen: false, type: null, data: null });
+    setModalConfig({ isOpen: false, type: null, data: null, editMode: false });
   };
 
-  const handleModalCancel = () => setModalConfig({ isOpen: false, type: null, data: null });
+  const handleModalDelete = () => {
+    if (modalConfig.type === 'NODE' && modalConfig.editMode) {
+      const nodeId = modalConfig.data.id;
+      setNodes(prev => prev.filter(n => n.id !== nodeId));
+      setEdges(prev => prev.filter(e => e.startNodeId !== nodeId && e.endNodeId !== nodeId));
+    } else if (modalConfig.type === 'EDGE' && modalConfig.editMode) {
+      setEdges(prev => prev.filter((_, i) => i !== modalConfig.data.idx));
+    }
+    setModalConfig({ isOpen: false, type: null, data: null, editMode: false });
+  };
+
+  const handleModalCancel = () => setModalConfig({ isOpen: false, type: null, data: null, editMode: false });
+
+  const handleExportGeoJSON = () => {
+    if (nodes.length === 0) { alert('No hay datos para exportar.'); return; }
+    
+    const geojson = {
+      type: "FeatureCollection",
+      features: [
+        ...nodes.map(n => ({
+          type: "Feature",
+          properties: {
+            id: n.id,
+            type: n.type,
+            initialContent: n.initialContent,
+            maximumCapacity: n.maximumCapacity,
+            enable: n.enable
+          },
+          geometry: { type: "Point", coordinates: [n.lng, n.lat] }
+        })),
+        ...edges.map(e => {
+          const startNode = nodes.find(n => n.id === e.startNodeId);
+          const endNode = nodes.find(n => n.id === e.endNodeId);
+          return {
+            type: "Feature",
+            properties: {
+              startNodeId: e.startNodeId,
+              endNodeId: e.endNodeId,
+              weight: e.weight,
+              capacity: e.capacity,
+              time: e.time,
+              enable: e.enable
+            },
+            geometry: { 
+              type: "LineString", 
+              coordinates: (startNode && endNode) ? [[startNode.lng, startNode.lat], [endNode.lng, endNode.lat]] : [] 
+            }
+          };
+        })
+      ]
+    };
+
+    const blob = new Blob([JSON.stringify(geojson, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `muralla_grafo_${nodes.length}n_${edges.length}a.geojson`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   const generateRoutes = async () => {
-    if (nodes.length < 2) { alert('Se necesitan al menos 2 nodos (origen + destino).'); return; }
+    if (nodes.length < 2) { alert('Se necesitan al menos 2 nodos en el grafo.'); return; }
+    if (algorithmMode !== 'NONE' && algorithmMode !== 'RESOLVE_GRAPH' && algorithmSelectedNodes.length < 2) { alert('Seleccione nodo origen y destino en el mapa.'); return; }
+
+    const headers = { 'Content-Type': 'application/json' };
+
     setIsGenerating(true);
     try {
-      const resp = await fetch('http://localhost:8080/api/routes/generate', {
+      if (algorithmMode === 'RESOLVE_GRAPH') {
+        const geojson = {
+          type: "FeatureCollection",
+          features: [
+            ...nodes.map(n => ({
+              type: "Feature",
+              properties: { id: n.id, type: n.type, initialContent: n.initialContent, maximumCapacity: n.maximumCapacity, enable: n.enable },
+              geometry: { type: "Point", coordinates: [n.lng, n.lat] }
+            })),
+            ...edges.map(e => ({
+              type: "Feature",
+              properties: { startNodeId: e.startNodeId, endNodeId: e.endNodeId, weight: e.weight, capacity: e.capacity, time: e.time, enable: e.enable },
+              geometry: { type: "LineString", coordinates: [] } 
+            }))
+          ]
+        };
+
+        const resp = await fetch('http://localhost:3000/upload-geojson', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(geojson)
+        });
+        if (!resp.ok) throw new Error(`Error ${resp.status}`);
+        const responseData = await resp.json();
+        
+        const stringOutput = typeof responseData === 'string' ? responseData : responseData.output || JSON.stringify(responseData);
+        const soluciones = parseResolveGraphOutput(stringOutput, nodes, edges);
+        
+        if (soluciones.length === 0) alert('No se encontraron soluciones.');
+        setRouteSolutions(soluciones);
+        setActiveSolution(0);
+        return;
+      }
+
+      const payload = {
+        nodes,
+        edges,
+        algorithmMode: algorithmMode === 'NONE' ? 'DIJKSTRA' : algorithmMode,
+        sourceNodeId: algorithmSelectedNodes[0]?.id,
+        targetNodeId: algorithmSelectedNodes[1]?.id
+      };
+
+      const resp = await fetch('http://localhost:8081/api/routes/generate', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ nodes, edges })
+        headers,
+        body: JSON.stringify(payload)
       });
       if (!resp.ok) throw new Error(`Error ${resp.status}`);
       const solutions = await resp.json();
@@ -185,37 +352,44 @@ function App() {
       setActiveSolution(0);
     } catch (e) {
       console.error(e);
-      alert('Error conectando con el backend en :8080');
+      alert('Error conectando con el backend en puerto :8081');
     } finally {
       setIsGenerating(false);
     }
   };
 
-  const loadLegacyGraph = async () => {
-    try {
-      const resp = await fetch('/data/Grafo_Grande.geojson');
-      if (!resp.ok) throw new Error('Not found');
-      const data = await resp.json();
-      const newNodes = [], newEdges = [];
-      data.features.forEach(f => {
-        if (f.geometry.type === 'Point') newNodes.push({
-          id: f.properties.id,
-          lat: f.geometry.coordinates[1], lng: f.geometry.coordinates[0],
-          type: parseInt(f.properties.type) || 1,
-          initialContent: parseInt(f.properties.initialContent) || 0,
-          maximumCapacity: parseInt(f.properties.maximumCapacity) || 100,
-          enable: f.properties.enable
+  const fileInputRef = useRef(null);
+
+  const handleFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const data = JSON.parse(evt.target.result);
+        const newNodes = [], newEdges = [];
+        data.features.forEach(f => {
+          if (f.geometry.type === 'Point') newNodes.push({
+            id: f.properties.id,
+            lat: f.geometry.coordinates[1], lng: f.geometry.coordinates[0],
+            type: parseInt(f.properties.type) || 1,
+            initialContent: parseInt(f.properties.initialContent) || 0,
+            maximumCapacity: parseInt(f.properties.maximumCapacity) || 100,
+            enable: f.properties.enable !== false // keep true by default
+          });
+          else if (f.geometry.type === 'LineString') newEdges.push({
+            startNodeId: f.properties.startNodeId, endNodeId: f.properties.endNodeId,
+            weight: parseInt(f.properties.weight) || 10,
+            capacity: parseInt(f.properties.capacity) || 50,
+            time: parseInt(f.properties.time) || 5,
+            enable: f.properties.enable !== false
+          });
         });
-        else if (f.geometry.type === 'LineString') newEdges.push({
-          startNodeId: f.properties.startNodeId, endNodeId: f.properties.endNodeId,
-          weight: parseInt(f.properties.weight) || 10,
-          capacity: parseInt(f.properties.capacity) || 50,
-          time: parseInt(f.properties.time) || 5,
-          enable: f.properties.enable
-        });
-      });
-      setNodes(newNodes); setEdges(newEdges); setGraphMode('IDLE');
-    } catch (e) { alert('Error cargando Grafo_Grande.geojson'); }
+        setNodes(newNodes); setEdges(newEdges); setGraphMode('IDLE');
+        e.target.value = null; 
+      } catch (err) { alert('Error parseando el archivo JSON/GeoJSON. '+err.message); }
+    };
+    reader.readAsText(file);
   };
 
   const modeLabel = graphMode === 'ADD_NODE' ? 'Click en el mapa para añadir un nodo'
@@ -302,6 +476,22 @@ function App() {
           {activeTab === 'editor' && (
             <div className="tab-content">
               <div className="sidebar-section">
+                <h3 className="section-title">Visualización</h3>
+                <div className="toggle-group">
+                  <label className="switch-control">
+                    <span>Mostrar Cuadrícula</span>
+                    <input type="checkbox" checked={showGrid} onChange={e => setShowGrid(e.target.checked)} />
+                    <span className="slider"></span>
+                  </label>
+                  <label className="switch-control" style={{marginTop: '12px'}}>
+                    <span>Visualizar Sentido</span>
+                    <input type="checkbox" checked={showDirection} onChange={e => setShowDirection(e.target.checked)} />
+                    <span className="slider"></span>
+                  </label>
+                </div>
+              </div>
+
+              <div className="sidebar-section">
                 <h3 className="section-title">Herramientas de Grafo</h3>
                 <p className="section-hint">Selecciona una herramienta y haz clic en el mapa</p>
                 <div className="tool-grid">
@@ -316,6 +506,74 @@ function App() {
                 </div>
                 {modeLabel && <div className="mode-status"><div className="status-dot pulsing" /><span>{modeLabel}</span></div>}
               </div>
+
+              <div className="sidebar-section">
+                <h3 className="section-title">Algoritmos</h3>
+                <div className="algorithm-grid">
+                  <button 
+                    className={`algo-btn ${algorithmMode === 'DIJKSTRA' ? 'active' : ''}`} 
+                    onClick={() => {
+                        setAlgorithmMode(algorithmMode === 'DIJKSTRA' ? 'NONE' : 'DIJKSTRA');
+                        setAlgorithmSelectedNodes([]);
+                        setRouteSolutions([]);
+                        setActiveSolution(0);
+                    }}
+                  >
+                    Dijkstra
+                  </button>
+                  <button 
+                    className={`algo-btn ${algorithmMode === 'FORD_FULKERSON' ? 'active' : ''}`} 
+                    onClick={() => {
+                        setAlgorithmMode(algorithmMode === 'FORD_FULKERSON' ? 'NONE' : 'FORD_FULKERSON');
+                        setAlgorithmSelectedNodes([]);
+                        setRouteSolutions([]);
+                        setActiveSolution(0);
+                    }}
+                  >
+                    Ford-Fulkerson
+                  </button>
+                  <button 
+                    className={`algo-btn ${algorithmMode === 'RESOLVE_GRAPH' ? 'active' : ''}`} 
+                    onClick={() => {
+                        setAlgorithmMode(algorithmMode === 'RESOLVE_GRAPH' ? 'NONE' : 'RESOLVE_GRAPH');
+                        setAlgorithmSelectedNodes([]);
+                        setRouteSolutions([]);
+                        setActiveSolution(0);
+                    }}
+                    style={{ background: algorithmMode === 'RESOLVE_GRAPH' ? '#ff6b6b' : 'rgba(255, 107, 107, 0.1)' }}
+                  >
+                    Resolve Graph
+                  </button>
+                </div>
+                {algorithmMode !== 'NONE' && (
+                  <div className="selection-info">
+                    {algorithmMode !== 'RESOLVE_GRAPH' ? (
+                      <>
+                        <div className="selection-step">
+                          <span className={`step-dot ${algorithmSelectedNodes.length >= 1 ? 'filled' : 'empty'}`}></span>
+                          <span>Origen: {algorithmSelectedNodes[0]?.id || '...'}</span>
+                        </div>
+                        <div className="selection-step">
+                          <span className={`step-dot ${algorithmSelectedNodes.length >= 2 ? 'filled' : 'empty'}`}></span>
+                          <span>Destino: {algorithmSelectedNodes[1]?.id || '...'}</span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="selection-step">
+                        <span className="step-dot filled"></span>
+                        <span>Se enviará todo el grafo actual.</span>
+                      </div>
+                    )}
+                    
+                    {(algorithmSelectedNodes.length === 2 || algorithmMode === 'RESOLVE_GRAPH') && (
+                        <button className="cta-btn primary" style={{marginTop: '1rem'}} onClick={generateRoutes}>
+                            Calcular {algorithmMode === 'DIJKSTRA' ? 'Dijkstra' : algorithmMode === 'FORD_FULKERSON' ? 'Max Flow' : 'Solución Global'}
+                        </button>
+                    )}
+                  </div>
+                )}
+              </div>
+
               <div className="sidebar-section">
                 <h3 className="section-title">Datos del Grafo</h3>
                 <div className="graph-stats-grid">
@@ -323,8 +581,14 @@ function App() {
                   <div className="graph-stat"><span className="graph-stat-num">{edges.length}</span><span className="graph-stat-label">Aristas</span></div>
                 </div>
                 <div className="action-list">
-                  <button className="action-btn" onClick={loadLegacyGraph}><IconUpload /> Cargar Grafo v1.0</button>
-                  <button className="action-btn danger" onClick={() => { setNodes([]); setEdges([]); setSelectedNodeA(null); setGraphMode('IDLE'); }}><IconTrash /> Limpiar todo</button>
+                  <input type="file" accept=".json,.geojson" ref={fileInputRef} style={{display:'none'}} onChange={handleFileUpload} />
+                  <button className="action-btn" onClick={() => fileInputRef.current?.click()}><IconUpload /> Importar Grafo Local</button>
+                  <button className="action-btn" onClick={handleExportGeoJSON} style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', color: '#fff' }}>Exportar GEOJSON</button>
+                  <button className="action-btn danger" onClick={() => { 
+                    setNodes([]); setEdges([]); setSelectedNodeA(null); 
+                    setGraphMode('IDLE'); setAlgorithmSelectedNodes([]);
+                    setRouteSolutions([]); setActiveSolution(0); 
+                  }}><IconTrash /> Limpiar todo</button>
                 </div>
               </div>
             </div>
@@ -345,20 +609,26 @@ function App() {
                selectedNodeA={selectedNodeA}
                onAddNode={handleAddNode}
                onSelectNode={handleSelectNode}
+               onSelectEdge={handleSelectEdge}
                routeSolutions={routeSolutions}
                activeSolution={activeSolution}
+               showGrid={showGrid}
+               showDirection={showDirection}
+               algorithmSelectedNodes={algorithmSelectedNodes}
              />
-          )}
-
-          {!isSidebarOpen && (
-            <button className="sidebar-fab" onClick={() => setSidebarOpen(true)} title={isMobile ? 'Abrir panel' : 'Mostrar panel'}>
-              {isMobile ? <IconRoute /> : <IconMenu />}
-            </button>
           )}
         </div>
       </div>
 
-      <ElementModal isOpen={modalConfig.isOpen} type={modalConfig.type} onSave={handleModalSave} onCancel={handleModalCancel} />
+      <ElementModal
+        isOpen={modalConfig.isOpen}
+        type={modalConfig.type}
+        initialData={modalConfig.editMode ? modalConfig.data : null}
+        editMode={modalConfig.editMode}
+        onSave={handleModalSave}
+        onCancel={handleModalCancel}
+        onDelete={modalConfig.editMode ? handleModalDelete : null}
+      />
     </div>
   );
 }
