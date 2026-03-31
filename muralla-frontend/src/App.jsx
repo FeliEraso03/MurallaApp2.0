@@ -156,6 +156,67 @@ function App() {
         m.setPaintProperty('highway_name_other', 'text-color', '#00b4d8');
         m.setPaintProperty('highway_name_other', 'text-halo-color', '#000000');
       }
+
+      // ── LIVE OVERPASS API POIS (Restaurants, Bars, Museums) ──
+      const overpassQuery = `
+        [out:json][timeout:25];
+        (
+          node["amenity"="restaurant"](10.415,-75.555,10.430,-75.540);
+          node["amenity"="cafe"](10.415,-75.555,10.430,-75.540);
+          node["amenity"="bar"](10.415,-75.555,10.430,-75.540);
+          node["tourism"="museum"](10.415,-75.555,10.430,-75.540);
+        );
+        out body;
+      `;
+
+      fetch('https://overpass-api.de/api/interpreter', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: 'data=' + encodeURIComponent(overpassQuery)
+      })
+      .then(res => res.json())
+      .then(data => {
+        const dynamicFeatures = data.elements
+          .filter(el => el.tags && el.tags.name) // Solo lugares que tengan nombre oficial
+          .map(el => {
+            let icon = '📍';
+            if (el.tags.amenity === 'restaurant') icon = '🍽️';
+            else if (el.tags.amenity === 'cafe') icon = '☕';
+            else if (el.tags.amenity === 'bar') icon = '🍹';
+            else if (el.tags.tourism === 'museum') icon = '🎭';
+            
+            return {
+              type: 'Feature',
+              geometry: { type: 'Point', coordinates: [el.lon, el.lat] },
+              properties: { name: `${icon} ${el.tags.name}` }
+            };
+          });
+
+        m.addSource('osm-dynamic-pois', {
+          type: 'geojson',
+          data: { type: 'FeatureCollection', features: dynamicFeatures }
+        });
+
+        m.addLayer({
+          id: 'osm-dynamic-poi-labels',
+          type: 'symbol',
+          source: 'osm-dynamic-pois',
+          minzoom: 16.5, // Solo mostrar para evitar sobresaturación cuando el mapa esté alejado
+          layout: {
+            'text-field': '{name}',
+            'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
+            'text-size': 11,
+            'text-anchor': 'bottom',
+            'text-offset': [0, -0.5]
+          },
+          paint: {
+            'text-color': '#bde0fe',
+            'text-halo-color': '#023e8a',
+            'text-halo-width': 1.2
+          }
+        });
+      })
+      .catch(err => console.error("Error cargando POIs dinámicos de Overpass:", err));
     });
 
     return () => {
