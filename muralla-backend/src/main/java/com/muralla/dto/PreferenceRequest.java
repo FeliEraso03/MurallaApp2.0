@@ -15,6 +15,7 @@ public class PreferenceRequest {
     private Integer defaultTimeAvailableHours;
     private String  mobilityType;
     private String  groupType;
+    private String  profilePictureUrl;
 
     private Integer interestCulture;
     private Integer interestReligion;

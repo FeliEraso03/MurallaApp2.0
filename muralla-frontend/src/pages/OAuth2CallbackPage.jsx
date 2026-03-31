@@ -24,6 +24,7 @@ export function OAuth2CallbackPage() {
     const token = params.get('token');
     const email = params.get('email');
     const name  = params.get('name');
+    const picture = params.get('picture');
 
     if (!token || !email) {
       setError('No se recibió un token válido de Google. Intenta de nuevo.');
@@ -32,7 +33,12 @@ export function OAuth2CallbackPage() {
     }
 
     // Persist the session (same as after a normal login)
-    persistOAuth({ token, email, fullName: decodeURIComponent(name || '') });
+    persistOAuth({ 
+      token, 
+      email, 
+      fullName: decodeURIComponent(name || ''),
+      profilePictureUrl: picture ? decodeURIComponent(picture) : null
+    });
     setStatus('¡Autenticado! Redirigiendo...');
 
     // New user via Google goes to preferences wizard; existing users go to editor

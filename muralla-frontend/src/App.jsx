@@ -559,9 +559,13 @@ function App() {
               color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
               textDecoration: 'none', fontWeight: 'bold', fontSize: '1.1rem',
               boxShadow: '0 0 10px rgba(247, 127, 0, 0.4)', border: '2px solid rgba(255,255,255,0.1)',
-              marginLeft: '10px'
+              marginLeft: '10px', overflow: 'hidden'
             }}>
-              {user.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'}
+              {user.profilePictureUrl ? (
+                <img src={user.profilePictureUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                user.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'
+              )}
             </Link>
           )}
         </div>

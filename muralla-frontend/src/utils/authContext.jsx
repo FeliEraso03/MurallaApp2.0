@@ -56,8 +56,8 @@ export function AuthProvider({ children }) {
   };
 
   // ── OAuth2 callback (Google) ──────────────────────
-  const persistOAuth = ({ token, email, fullName }) => {
-    persist({ token, email, fullName });
+  const persistOAuth = ({ token, email, fullName, profilePictureUrl }) => {
+    persist({ token, email, fullName, profilePictureUrl });
     // Don't mark prefs_done — OAuth2CallbackPage decides that
   };
 
@@ -72,9 +72,20 @@ export function AuthProvider({ children }) {
       body: JSON.stringify(preferences),
     });
     if (!resp.ok) throw new Error('Error guardando preferencias');
-    // Mark wizard as done so future logins redirect to /editor
+    
+    const data = await resp.json();
+    // Update local context/storage with the freshly saved profile picture
+    if (data.profilePictureUrl) {
+      persist({ 
+        token, 
+        email: data.email, 
+        fullName: data.fullName, 
+        profilePictureUrl: data.profilePictureUrl 
+      });
+    }
+
     localStorage.setItem('muralla_prefs_done', '1');
-    return resp.json();
+    return data;
   };
 
   // ── Logout ────────────────────────────────────────
@@ -92,9 +103,10 @@ export function AuthProvider({ children }) {
     localStorage.setItem('muralla_user', JSON.stringify({
       email: data.email,
       fullName: data.fullName,
+      profilePictureUrl: data.profilePictureUrl
     }));
     setToken(data.token);
-    setUser({ email: data.email, fullName: data.fullName });
+    setUser({ email: data.email, fullName: data.fullName, profilePictureUrl: data.profilePictureUrl });
   };
 
   return (

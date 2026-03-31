@@ -137,6 +137,7 @@ export function PreferencesPage() {
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [profilePicture, setProfilePicture] = useState(user?.profilePictureUrl || null);
 
   const [interests, setInterests] = useState({
     interestCulture:    7,
@@ -161,7 +162,7 @@ export function PreferencesPage() {
     setLoading(true);
     setError('');
     try {
-      await savePreferences({ ...interests, ...logistics });
+      await savePreferences({ ...interests, ...logistics, profilePictureUrl: profilePicture });
       navigate('/editor');
     } catch (err) {
       setError(err.message || 'Error guardando preferencias. Puedes cambiarlas luego.');
@@ -170,6 +171,43 @@ export function PreferencesPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError('La imagen no puede pesar más de 5MB');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const maxSize = 200;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxSize) { height *= maxSize / width; width = maxSize; }
+        } else {
+          if (height > maxSize) { width *= maxSize / height; height = maxSize; }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        const base64 = canvas.toDataURL('image/jpeg', 0.8);
+        setProfilePicture(base64);
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
   };
 
   const profile = getTravelerProfile(interests);
@@ -292,7 +330,33 @@ export function PreferencesPage() {
 
             {/* Profile card */}
             <div className="pref-profile-card">
-              <div className="pref-avatar">{profile.icon}</div>
+              <label 
+                htmlFor="pref-avatar-upload" 
+                title="Cambiar foto de perfil"
+                style={{
+                  cursor: 'pointer', display: 'block', margin: '0 auto 1rem', width: '80px', height: '80px', position: 'relative'
+                }}
+              >
+                <div className="pref-avatar" style={{ margin: 0, width: '100%', height: '100%', overflow: 'hidden', border: '3px solid var(--orange)' }}>
+                  {profilePicture ? (
+                    <img src={profilePicture} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    profile.icon
+                  )}
+                </div>
+                <div style={{
+                  position: 'absolute', bottom: -5, right: -5, background: 'var(--navy-mid)',
+                  borderRadius: '50%', width: '28px', height: '28px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  border: '2px solid rgba(255,255,255,0.1)', color: 'white'
+                }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                     <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+                  </svg>
+                </div>
+              </label>
+              <input type="file" id="pref-avatar-upload" accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} />
+              
               <div className="pref-profile-name">{user?.fullName || 'Viajero'}</div>
               <div className="pref-profile-type">{profile.label}</div>
               <div className="pref-summary-chips">

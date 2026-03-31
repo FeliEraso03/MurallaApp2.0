@@ -44,6 +44,10 @@ public class UserController {
             pref.setUser(user);
         }
 
+        if (req.getProfilePictureUrl() != null) {
+            user.setProfilePictureUrl(req.getProfilePictureUrl());
+        }
+
         if (req.getDefaultTimeAvailableHours() != null)
             pref.setDefaultTimeAvailableHours(req.getDefaultTimeAvailableHours());
         if (req.getMobilityType() != null)
@@ -74,6 +78,7 @@ public class UserController {
         return new java.util.HashMap<>() {{
             put("email", user.getEmail());
             put("fullName", user.getFullName());
+            put("profilePictureUrl", user.getProfilePictureUrl());
             put("preferences", p);
         }};
     }

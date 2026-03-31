@@ -78,6 +78,7 @@ public class SecurityConfig {
 
                 String email    = oauth2User.getAttribute("email");
                 String fullName = oauth2User.getAttribute("name");
+                String picture  = oauth2User.getAttribute("picture");
 
                 // Find or create user
                 User user = userRepository.findByEmail(email).orElseGet(() -> {
@@ -96,6 +97,7 @@ public class SecurityConfig {
                     User newUser = User.builder()
                             .fullName(fullName)
                             .email(email)
+                            .profilePictureUrl(picture)
                             .password("") // no password for OAuth2 users
                             .role(Role.USER)
                             .preference(pref)
@@ -112,7 +114,8 @@ public class SecurityConfig {
                 // The frontend's OAuth2Callback page reads window.location.hash
                 response.sendRedirect(frontendUrl + "/oauth2-callback#token=" + token
                         + "&email=" + email
-                        + "&name=" + java.net.URLEncoder.encode(fullName != null ? fullName : "", "UTF-8"));
+                        + "&name=" + java.net.URLEncoder.encode(fullName != null ? fullName : "", "UTF-8")
+                        + "&picture=" + java.net.URLEncoder.encode(picture != null ? picture : "", "UTF-8"));
             }
         };
     }

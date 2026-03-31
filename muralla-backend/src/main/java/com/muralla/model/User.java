@@ -26,6 +26,9 @@ public class User implements UserDetails {
 
     private String fullName;
 
+    @Column(columnDefinition = "TEXT")
+    private String profilePictureUrl;
+
     @Column(unique = true, nullable = false)
     private String email;
 

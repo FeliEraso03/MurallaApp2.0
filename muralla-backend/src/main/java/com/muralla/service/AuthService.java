@@ -41,6 +41,7 @@ public class AuthService {
         var user = User.builder()
                 .fullName(request.getFullName())
                 .email(request.getEmail())
+                .profilePictureUrl(request.getProfilePictureUrl())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(Role.USER)
                 .preference(preference)
@@ -57,6 +58,7 @@ public class AuthService {
                 .token(jwtToken)
                 .email(user.getEmail())
                 .fullName(user.getFullName())
+                .profilePictureUrl(user.getProfilePictureUrl())
                 .build();
     }
 
@@ -77,6 +79,7 @@ public class AuthService {
                 .token(jwtToken)
                 .email(user.getEmail())
                 .fullName(user.getFullName())
+                .profilePictureUrl(user.getProfilePictureUrl())
                 .build();
     }
 

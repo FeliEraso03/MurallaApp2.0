@@ -72,6 +72,7 @@ export function RegisterPage() {
   const { register } = useAuth();
 
   const [form, setForm] = useState({ fullName: '', email: '', password: '', confirm: '' });
+  const [profilePicture, setProfilePicture] = useState(null);
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -98,7 +99,12 @@ export function RegisterPage() {
     if (Object.keys(errs).length) { setFieldErrors(errs); return; }
     setLoading(true);
     try {
-      await register({ fullName: form.fullName, email: form.email, password: form.password });
+      await register({ 
+        fullName: form.fullName, 
+        email: form.email, 
+        password: form.password,
+        profilePictureUrl: profilePicture 
+      });
       // Redirect to preferences wizard after registration
       navigate('/preferences');
     } catch (err) {
@@ -110,6 +116,44 @@ export function RegisterPage() {
 
   const handleGoogle = () => {
     window.location.href = 'http://localhost:8081/oauth2/authorization/google';
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError('La imagen no puede pesar más de 5MB');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const maxSize = 200;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxSize) { height *= maxSize / width; width = maxSize; }
+        } else {
+          if (height > maxSize) { width *= maxSize / height; height = maxSize; }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        
+        // Comprimir aggressive JPEG
+        const base64 = canvas.toDataURL('image/jpeg', 0.8);
+        setProfilePicture(base64);
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -178,6 +222,39 @@ export function RegisterPage() {
           </div>
 
           <form onSubmit={handleSubmit} noValidate>
+            {/* Profile Picture Upload */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <label htmlFor="reg-avatar" style={{ cursor: 'pointer', position: 'relative' }}>
+                <div style={{
+                  width: '80px', height: '80px', borderRadius: '50%',
+                  background: profilePicture ? `url(${profilePicture}) center/cover no-repeat` : 'rgba(255,255,255,0.05)',
+                  border: '2px dashed rgba(255,255,255,0.2)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  color: 'rgba(255,255,255,0.5)', overflow: 'hidden', transition: 'border 0.2s'
+                }}>
+                  {!profilePicture && (
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" />
+                    </svg>
+                  )}
+                </div>
+                <div style={{
+                  position: 'absolute', bottom: 0, right: 0, background: 'var(--orange)',
+                  borderRadius: '50%', width: '26px', height: '26px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.3)', color: 'white'
+                }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                  </svg>
+                </div>
+              </label>
+              <input type="file" id="reg-avatar" accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} />
+              <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.4)', marginTop: '8px' }}>
+                Foto de perfil (opcional)
+              </span>
+            </div>
+
             {/* Full name */}
             <div className="auth-field">
               <label className="auth-label" htmlFor="reg-fullname">Nombre completo</label>
