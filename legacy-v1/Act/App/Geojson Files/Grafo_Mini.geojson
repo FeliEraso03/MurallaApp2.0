@@ -1,0 +1,626 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "Node1",
+        "type": "1",
+        "initialContent": "5",
+        "maximumCapacity": "10",
+        "enable": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.54575800895692,
+          10.43011604708553
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "Node2",
+        "type": "2",
+        "initialContent": "4",
+        "maximumCapacity": "8",
+        "enable": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.5462568998337,
+          10.427916039552096
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "Node3",
+        "type": "2",
+        "initialContent": "7",
+        "maximumCapacity": "14",
+        "enable": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.54737269878389,
+          10.427958246077917
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "Node4",
+        "type": "2",
+        "initialContent": "6",
+        "maximumCapacity": "12",
+        "enable": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.54709374904634,
+          10.42944074666675
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "Node5",
+        "type": "2",
+        "initialContent": "8",
+        "maximumCapacity": "16",
+        "enable": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.54752826690675,
+          10.42934578242787
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "Node6",
+        "type": "2",
+        "initialContent": "3",
+        "maximumCapacity": "4",
+        "enable": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.5478072166443,
+          10.427995176783305
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "Node7",
+        "type": "2",
+        "initialContent": "5",
+        "maximumCapacity": "5",
+        "enable": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.5480057001114,
+          10.426823943707184
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "Node8",
+        "type": "3",
+        "initialContent": "6",
+        "maximumCapacity": "5",
+        "enable": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.54611742496492,
+          10.426940012046542
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "id": "Node9",
+        "type": "2",
+        "initialContent": "5",
+        "maximumCapacity": "5",
+        "enable": true
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.54739415645601,
+          10.426855598713104
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "startNodeId": "Node1",
+        "endNodeId": "Node2",
+        "weight": "4",
+        "time": "16",
+        "capacity": "7",
+        "distance": 250.63962354737657,
+        "arrowPolygon": [
+          [
+            10.429016043318814,
+            -75.54600745439531
+          ],
+          [
+            10.42905812180441,
+            -75.54604405487726
+          ],
+          [
+            10.429038218048571,
+            -75.54595628335281
+          ]
+        ],
+        "enable": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -75.54575800895692,
+            10.43011604708553
+          ],
+          [
+            -75.5462568998337,
+            10.427916039552096
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "startNodeId": "Node2",
+        "endNodeId": "Node3",
+        "weight": "6",
+        "time": "7",
+        "capacity": "6",
+        "distance": 122.11215965350138,
+        "arrowPolygon": [
+          [
+            10.427937142815008,
+            -75.54681479930879
+          ],
+          [
+            10.427980865462189,
+            -75.54678017959831
+          ],
+          [
+            10.427890929780418,
+            -75.54678358153079
+          ]
+        ],
+        "enable": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -75.5462568998337,
+            10.427916039552096
+          ],
+          [
+            -75.54737269878389,
+            10.427958246077917
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "startNodeId": "Node3",
+        "endNodeId": "Node4",
+        "weight": "4",
+        "time": "5",
+        "capacity": "5",
+        "distance": 167.64534947891863,
+        "arrowPolygon": [
+          [
+            10.428699496372333,
+            -75.54723322391511
+          ],
+          [
+            10.428658800952935,
+            -75.54719509155262
+          ],
+          [
+            10.4286754434506,
+            -75.54728353943146
+          ]
+        ],
+        "enable": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -75.54737269878389,
+            10.427958246077917
+          ],
+          [
+            -75.54709374904634,
+            10.42944074666675
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "startNodeId": "Node1",
+        "endNodeId": "Node4",
+        "weight": "3",
+        "time": "5",
+        "capacity": "8",
+        "distance": 164.2436180722304,
+        "arrowPolygon": [
+          [
+            10.42977839687614,
+            -75.54642587900163
+          ],
+          [
+            10.429833419267544,
+            -75.54641678336128
+          ],
+          [
+            10.429753100331236,
+            -75.5463761770998
+          ]
+        ],
+        "enable": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -75.54575800895692,
+            10.43011604708553
+          ],
+          [
+            -75.54709374904634,
+            10.42944074666675
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "startNodeId": "Node4",
+        "endNodeId": "Node5",
+        "weight": "5",
+        "time": "3",
+        "capacity": "8",
+        "distance": 48.67708150894957,
+        "arrowPolygon": [
+          [
+            10.42939326454731,
+            -75.54731100797655
+          ],
+          [
+            10.429444260421729,
+            -75.54728843332214
+          ],
+          [
+            10.429356335765942,
+            -75.54726921731567
+          ]
+        ],
+        "enable": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -75.54709374904634,
+            10.42944074666675
+          ],
+          [
+            -75.54752826690675,
+            10.42934578242787
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "startNodeId": "Node5",
+        "endNodeId": "Node6",
+        "weight": "4",
+        "time": "4",
+        "capacity": "6",
+        "distance": 153.24738654481408,
+        "arrowPolygon": [
+          [
+            10.428670479605588,
+            -75.54766774177553
+          ],
+          [
+            10.428711843030923,
+            -75.54770514847645
+          ],
+          [
+            10.428693638936362,
+            -75.54761700875248
+          ]
+        ],
+        "enable": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -75.54752826690675,
+            10.42934578242787
+          ],
+          [
+            -75.5478072166443,
+            10.427995176783305
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "startNodeId": "Node3",
+        "endNodeId": "Node6",
+        "weight": "4",
+        "time": "6",
+        "capacity": "4",
+        "distance": 47.69526491836023,
+        "arrowPolygon": [
+          [
+            10.427976711430611,
+            -75.5475899577141
+          ],
+          [
+            10.428018759987545,
+            -75.54755332285244
+          ],
+          [
+            10.427929083303619,
+            -75.54756094468688
+          ]
+        ],
+        "enable": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -75.54737269878389,
+            10.427958246077917
+          ],
+          [
+            -75.5478072166443,
+            10.427995176783305
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "startNodeId": "Node2",
+        "endNodeId": "Node8",
+        "weight": "5",
+        "time": "5",
+        "capacity": "4",
+        "distance": 109.59588207390863,
+        "arrowPolygon": [
+          [
+            10.427428025799319,
+            -75.5461871623993
+          ],
+          [
+            10.427454270944697,
+            -75.54623636998585
+          ],
+          [
+            10.427467002656881,
+            -75.54614727507294
+          ]
+        ],
+        "enable": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -75.5462568998337,
+            10.427916039552096
+          ],
+          [
+            -75.54611742496492,
+            10.426940012046542
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "startNodeId": "Node6",
+        "endNodeId": "Node7",
+        "weight": "7",
+        "time": "7",
+        "capacity": "5",
+        "distance": 132.0316080993679,
+        "arrowPolygon": [
+          [
+            10.427409560245245,
+            -75.54790645837785
+          ],
+          [
+            10.427449558198449,
+            -75.54794532170206
+          ],
+          [
+            10.42743452071232,
+            -75.54785658684978
+          ]
+        ],
+        "enable": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -75.5478072166443,
+            10.427995176783305
+          ],
+          [
+            -75.5480057001114,
+            10.426823943707184
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "startNodeId": "Node9",
+        "endNodeId": "Node3",
+        "weight": "7",
+        "time": "7",
+        "capacity": "7",
+        "distance": 122.631246098129,
+        "arrowPolygon": [
+          [
+            10.42740692239551,
+            -75.54738342761995
+          ],
+          [
+            10.427373110804437,
+            -75.54733907707836
+          ],
+          [
+            10.427374861885506,
+            -75.54742906004184
+          ]
+        ],
+        "enable": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -75.54739415645601,
+            10.426855598713104
+          ],
+          [
+            -75.54737269878389,
+            10.427958246077917
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "startNodeId": "Node7",
+        "endNodeId": "Node9",
+        "weight": "7",
+        "time": "3",
+        "capacity": "8",
+        "distance": 66.97020945257766,
+        "arrowPolygon": [
+          [
+            10.426839771210144,
+            -75.5476999282837
+          ],
+          [
+            10.426793128480622,
+            -75.54773050032995
+          ],
+          [
+            10.426883008151504,
+            -75.5477351527231
+          ]
+        ],
+        "enable": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -75.5480057001114,
+            10.426823943707184
+          ],
+          [
+            -75.54739415645601,
+            10.426855598713104
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "startNodeId": "Node9",
+        "endNodeId": "Node8",
+        "weight": "6",
+        "time": "9",
+        "capacity": "7",
+        "distance": 139.93687583023785,
+        "arrowPolygon": [
+          [
+            10.426897805379824,
+            -75.54675579071046
+          ],
+          [
+            10.426850730123757,
+            -75.54678569245783
+          ],
+          [
+            10.426940534052264,
+            -75.54679163000148
+          ]
+        ],
+        "enable": true
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            -75.54739415645601,
+            10.426855598713104
+          ],
+          [
+            -75.54611742496492,
+            10.426940012046542
+          ]
+        ]
+      }
+    }
+  ]
+}

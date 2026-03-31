@@ -1,0 +1,252 @@
+.carousel-item {
+    height: 600px;
+    background-size: cover;
+    background-position: center;
+}
+
+.carousel-caption {
+    color: white;
+    text-align: center;
+}
+
+.carousel-caption h5 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    letter-spacing: 2px;
+}
+
+.carousel-caption h1 {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.carousel-caption .btn {
+    padding: 10px 30px;
+    font-size: 1.25rem;
+}
+
+.header {
+    background-color: #f8f9fa;
+}
+
+.header .container {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+}
+
+.header .container div {
+    display: flex;
+    align-items: center;
+}
+
+.header .container a {
+    color: #212529;
+    margin-left: 15px;
+    text-decoration: none;
+}
+
+
+
+
+.section-title {
+    text-align: center;
+    font-size: 2.5rem;
+}
+
+.feature-card {
+    padding: 20px;
+    margin: 20px 0;
+    text-align: center;
+    height: 250px;
+}
+
+.feature-icon {
+    font-size: 2rem;
+    color: #ffffff;
+    margin-bottom: 20px;
+}
+
+.feature-title {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+.feature-description {
+    font-size: 1rem;
+}
+
+.about-section {
+    text-align: center;
+}
+
+.footer {
+    padding: 20px 0;
+    text-align: center;
+}
+
+.boton {
+    background: rgba(0, 18, 51, 0.808);
+    /* White background with transparency */
+}
+
+.boton:hover {
+    background:  #001233;
+    
+    /* White background with transparency */
+}
+
+.title {
+    color: #fff;
+}
+
+.title:hover{
+    color: #ffffff;
+}
+
+.title2 {
+    color: #001233;
+}
+
+.title2:hover{
+    color: #001233;
+}
+
+.texto{
+    color: #d4d5d5;
+}
+
+.texto:hover {
+    color: #ffffff;
+}
+
+.negro {
+    background: rgba(16, 16, 16, 0.778);
+}
+
+.glass-container {
+    border-radius: 15px;
+    padding: 20px;
+
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(5px);
+    /* Apply blur to the background */
+    -webkit-backdrop-filter: blur(5px);
+    /* Safari support */
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    /* Light border */
+}
+
+.glass-container h3,
+.glass-container p {
+    color: #fff;
+
+}
+
+
+.icon {
+    font-size: 2rem;
+    color: #ffff;
+}
+
+h2 {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0px;
+}
+
+p {
+    font-size: 1rem;
+    color: #555;
+}
+
+
+.text-section {
+    background-color: rgba(255, 255, 255, 1);
+    /* Optional: To give a slight background to the text section */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* Optional: To add a shadow to the text section */
+    padding: 20px;
+    border-radius: 8px;
+}
+
+@media (min-width: 768px) {
+    .text-section {
+        position: absolute;
+        top: 150%;
+        left: 70%;
+        transform: translate(-50%, -50%);
+        width: 50%;
+
+    }
+
+    .seccion {
+        margin: 0px;
+
+    }
+
+}
+
+@media (max-width: 767px) {
+    .text-section {
+        margin-top: 30px;
+        position: relative;
+        top: auto;
+        left: auto;
+        transform: none;
+        width: 100%;
+    }
+}
+
+
+.testimonial-card {
+    border: none;
+    text-align: center;
+    padding: 20px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+.testimonial-card img {
+    border-radius: 50%;
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+}
+
+.testimonial-card p {
+    color: #777;
+    font-size: 16px;
+}
+
+.testimonial-card .client-name {
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.testimonial-card .profession {
+    color: #aaa;
+    font-size: 14px;
+}
+
+
+
+::-webkit-scrollbar {
+    width: 10px;
+  }
+  
+  
+  ::-webkit-scrollbar-thumb:hover {
+    background: #0353A4;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    background: #002855;
+    border-radius: 10px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    background: #979DAC;
+    border-radius: 10px;
+  }
+  

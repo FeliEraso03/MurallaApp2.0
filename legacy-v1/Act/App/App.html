@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Muralla APP</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="App.css">
+    <link rel="stylesheet" href="assets/switchMode.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="assets/switchGraph.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+</head>
+
+<body>
+
+
+    <div class="offcanvas offcanvas-end resizeable-offcanvas" data-bs-scroll="true" data-bs-backdrop="false"
+        tabindex="-1" id="offcanvasScrolling2" aria-labelledby="offcanvasScrollingLabel2">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasScrollingLabel2">Graph Panel</h5>
+            <button type="button" class="btn-close btn-close-white text-reset" data-bs-dismiss="offcanvas"
+                aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <hr />
+
+
+            <div class="nav-button hoversito"><i class="fa fa-project-diagram"></i><span>Create Graph</span>
+
+                <label class="switch switchGraph" style="margin-left: 30px;">
+                    <input type="checkbox" id="graphSwitch">
+                    <span class="slider"></span>
+                </label>
+
+            </div>
+
+            <div class="nav-button hoversito mt-3"><i class="fa fa-pencil"></i><span>Edit Graph</span>
+
+                <label class="switch switchGraph" style="margin-left: 30px;">
+                    <input type="checkbox" id="editCheckbox">
+                    <span class="slider"></span>
+                </label>
+
+            </div>
+
+            <div class="nav-button hoversito mt-3"><i class="fa fa-arrows"></i><span>Directed Graph</span>
+
+                <label class="switch switchGraph" style="margin-left: 30px;">
+                    <input type="checkbox" id="dirigidoCheckbox">
+                    <span class="slider"></span>
+                </label>
+
+            </div>
+
+
+            <div id="ClearGraph" class="nav-button hoversito mt-3"><i class="fas fa-trash-alt"></i><span>Clear
+                    Graph</span></div>
+
+
+        </div>
+    </div>
+    </div>
+
+
+
+    <div class="offcanvas offcanvas-end resizeable-offcanvas" data-bs-scroll="true" data-bs-backdrop="false"
+        tabindex="-1" id="offcanvasScrolling" aria-labelledby="offcanvasScrollingLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasScrollingLabel">Algorithms</h5>
+            <button type="button" class="btn-close btn-close-white text-reset" data-bs-dismiss="offcanvas"
+                aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <hr />
+
+            <div id="dijkstraAlgorithm" class="collapsed mx-3 nav-button hoversito" data-bs-toggle="collapse"
+                data-bs-target="#djastra-collapse" aria-expanded="false"><i class="fa fa-cogs"></i><span>Dijkstra`s
+                    Algorithm</span>
+
+                <a href="https://es.wikipedia.org/wiki/Algoritmo_de_Dijkstra" target="_blank" rel="noopener noreferrer">
+                    <i class="fa fa-question-circle "></i></a>
+
+            </div>
+
+            <div class="collapse" style="margin-left: 20px; margin-top: 10px;" id="djastra-collapse">
+                <div style="width: 35%;" class="nav-button hoversito" id="startAlgorithm"><i
+                        class="fas fa-eye"></i><span>Start</span>
+                </div>
+            </div>
+
+
+            <div id="FordFulkersonAlg" class="collapsed mx-3 nav-button hoversito" data-bs-toggle="collapse"
+                data-bs-target="#fordfulkerson-collapse" aria-expanded="false"><i class="fa fa-cogs"></i><span>Ford-Fulkerson
+                    Algorithm</span>
+                <a href="https://es.wikipedia.org/wiki/Algoritmo_de_Ford-Fulkerson" target="_blank"
+                    rel="noopener noreferrer">
+                    <i class="fa fa-question-circle "></i></a>
+            </div>
+
+            <div class="collapse" style="margin-left: 20px; margin-top: 10px;" id="fordfulkerson-collapse">
+                <div style="width: 35%;" class="nav-button hoversito" id="startFordFulkerson"><i
+                        class="fas fa-eye"></i><span>Start</span>
+                </div>
+            </div>
+            <hr />
+
+            <div class="resultadito" id="resultadito"></div>
+
+        </div>
+    </div>
+
+
+
+    <!--
+    <div class="offcanvas offcanvas-end resizeable-offcanvas" data-bs-scroll="true" data-bs-backdrop="false"
+        tabindex="-1" id="offcanvasScrolling3" aria-labelledby="offcanvasScrollingLabel3">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasScrollingLabel3">Layer Control Panel</h5>
+            <button type="button" class="btn-close btn-close-white text-reset" data-bs-dismiss="offcanvas"
+                aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body">
+            <hr />
+
+            <div class="resultadito"></div>
+        </div>
+    </div>-->
+    </div>
+
+
+   <div class="container-fluid row main-content w-full" style="background-color: #979DAC; margin: 0px;">
+
+        <div class="col-3 content-row">
+
+            <div id="nav-bar">
+                <input id="nav-toggle" type="checkbox" />
+                <div id="nav-header"><a id="nav-title" href="/index.html">MURALLA <i
+                            class="fab fa-codepen"></i></a>
+                    <label for="nav-toggle"><span id="nav-toggle-burger"></span></label>
+                    <hr />
+                </div>
+                <div id="nav-content">
+
+                    <div class="nav-button" id="toggleGridButton"><i class="fas fa-eye"></i><span>Show Grid</span></div>
+                    <div class="nav-button" id="toggleHeatmapButton"><i class="fas fa-fire"></i><span>Show Heat
+                            Map</span></div>
+                    <div class="nav-button" id="routeCreationButton"><i class="fas fa-road"></i><span>Routes</span>
+                    </div>
+
+                    <hr />
+
+
+                    <div class="nav-button" id="inputGroupFileAddon04" style="display:none;"><i
+                            class="fas fa-file-upload"></i><span>Select File</span></div>
+
+
+                    <!-- Input de tipo file oculto -->
+                    <input type="file" id="loadGraph" style="display: none;">
+
+
+                    <div class="nav-button" id="exportGraph" style="display:none;"><i
+                            class="fas fa-download"></i><span>Export File</span></div>
+
+                    <div class="nav-button" id="altButton3" style="display:none;" data-bs-toggle="offcanvas"
+                        data-bs-target="#offcanvasScrolling2" aria-controls="offcanvasScrolling"><i
+                            class="fas fa-bell"></i><span>Graph</span></div>
+
+                    <div class="nav-button" id="altButton4" style="display:none;" data-bs-toggle="offcanvas"
+                        data-bs-target="#offcanvasScrolling" aria-controls="offcanvasScrolling">
+                        <i class="fas fa-cog"></i><span>Algorithms</span>
+                    </div>
+
+                    <div class="nav-button" id="layerButton" style="display:none;">
+                        <i class="fa-solid fa-layer-group"></i> <span>Layers</span>
+                    </div>
+
+                    <div class="nav-button" id="SendButton" style="display:none;">
+                        <i class="fas fa-project-diagram"></i><span>Resolve Graph</span>
+                    </div>
+                    <hr />
+                    <div id="nav-content-highlight"></div>
+                    <hr />
+                    <div class="nav-button">
+                        <div>
+                            <label class="switch switchMode">
+                                <input id="mode-toggle" type="checkbox" checked>
+                                <span>
+                                    <em></em>
+                                    <strong></strong>
+                                </span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="map" style="margin-left: 0px; z-index: 0;"></div>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+    <script src="App.js" type="module"></script>
+    <script src="assets/LayerPanel/layerPanel.js" type="module"></script>
+    <script src="assets/Styles.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.5.0/turf.min.js"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/leaflet-polylineDecorator/1.1.0/leaflet.polylineDecorator.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sortablejs@latest/Sortable.min.js"></script>
+
+</body>
+
+</html>
