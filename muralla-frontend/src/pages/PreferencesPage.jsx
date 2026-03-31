@@ -132,7 +132,7 @@ function InterestSlider({ item, value, onChange }) {
 // ── Main component ────────────────────────────────────
 export function PreferencesPage() {
   const navigate = useNavigate();
-  const { user, savePreferences } = useAuth();
+  const { user, token, savePreferences } = useAuth();
 
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -153,6 +153,36 @@ export function PreferencesPage() {
     mobilityType: 'WALK',
     groupType: 'SOLO',
   });
+
+  React.useEffect(() => {
+    const fetchMe = async () => {
+      if (!token) return;
+      try {
+        const resp = await fetch('http://localhost:8081/api/users/me', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (resp.ok) {
+          const data = await resp.json();
+          if (data.preferences) {
+            setInterests({
+              interestCulture: data.preferences.interestCulture ?? 7,
+              interestReligion: data.preferences.interestReligion ?? 5,
+              interestGastronomy: data.preferences.interestGastronomy ?? 6,
+              interestNature: data.preferences.interestNature ?? 5,
+              interestArts: data.preferences.interestArts ?? 6,
+              interestAdventure: data.preferences.interestAdventure ?? 5,
+            });
+            setLogistics({
+              defaultTimeAvailableHours: data.preferences.defaultTimeAvailableHours ?? 4,
+              mobilityType: data.preferences.mobilityType ?? 'WALK',
+              groupType: data.preferences.groupType ?? 'SOLO',
+            });
+          }
+        }
+      } catch (err) { }
+    };
+    fetchMe();
+  }, [token]);
 
   const handleInterestChange = (key, val) => {
     setInterests(p => ({ ...p, [key]: val }));

@@ -378,9 +378,9 @@
   width: 100vw;
   background: var(--navy);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 2rem 1rem;
+  padding: 5vh 1rem 5vh 1rem;
   position: relative;
   overflow-x: hidden;
   overflow-y: auto;

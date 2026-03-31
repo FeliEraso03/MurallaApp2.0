@@ -4,3 +4,6 @@
 muralla-backend/src/main/resources/application.properties
 muralla-frontend/.env
 *.env
+**/target/
+**/dist/
+node_modules/
