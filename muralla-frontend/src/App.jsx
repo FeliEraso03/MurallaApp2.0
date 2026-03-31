@@ -146,8 +146,8 @@ function App() {
     if (algorithmMode !== 'NONE') {
       setAlgorithmSelectedNodes(prev => {
         if (prev.some(n => n.id === node.id)) return prev;
-        const next = [...prev, node].slice(-2);
-        return next;
+        if (prev.length >= 2) return [node]; // Reset on 3rd click
+        return [...prev, node];
       });
       return;
     }
@@ -392,6 +392,33 @@ function App() {
     reader.readAsText(file);
   };
 
+  const loadDefaultGraph = async () => {
+    try {
+      const resp = await fetch('/data/Grafo_Grande.geojson');
+      if (!resp.ok) throw new Error('Not found');
+      const data = await resp.json();
+      const newNodes = [], newEdges = [];
+      data.features.forEach(f => {
+        if (f.geometry.type === 'Point') newNodes.push({
+          id: f.properties.id,
+          lat: f.geometry.coordinates[1], lng: f.geometry.coordinates[0],
+          type: parseInt(f.properties.type) || 1,
+          initialContent: parseInt(f.properties.initialContent) || 0,
+          maximumCapacity: parseInt(f.properties.maximumCapacity) || 100,
+          enable: f.properties.enable !== false
+        });
+        else if (f.geometry.type === 'LineString') newEdges.push({
+          startNodeId: f.properties.startNodeId, endNodeId: f.properties.endNodeId,
+          weight: parseInt(f.properties.weight) || 10,
+          capacity: parseInt(f.properties.capacity) || 50,
+          time: parseInt(f.properties.time) || 5,
+          enable: f.properties.enable !== false
+        });
+      });
+      setNodes(newNodes); setEdges(newEdges); setGraphMode('IDLE');
+    } catch (e) { alert('Error cargando el grafo predeterminado.'); }
+  };
+
   const modeLabel = graphMode === 'ADD_NODE' ? 'Click en el mapa para añadir un nodo'
     : graphMode === 'ADD_EDGE'
       ? selectedNodeA ? `Origen: ${selectedNodeA.id} — selecciona el destino` : 'Selecciona el nodo origen'
@@ -582,6 +609,7 @@ function App() {
                 </div>
                 <div className="action-list">
                   <input type="file" accept=".json,.geojson" ref={fileInputRef} style={{display:'none'}} onChange={handleFileUpload} />
+                  <button className="action-btn" onClick={loadDefaultGraph} style={{ background: 'rgba(0, 255, 136, 0.1)', color: '#00ff88' }}><IconMap /> Cargar Cartagena (Full)</button>
                   <button className="action-btn" onClick={() => fileInputRef.current?.click()}><IconUpload /> Importar Grafo Local</button>
                   <button className="action-btn" onClick={handleExportGeoJSON} style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', color: '#fff' }}>Exportar GEOJSON</button>
                   <button className="action-btn danger" onClick={() => { 

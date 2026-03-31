@@ -1,11 +1,28 @@
 /* Pages CSS - V2 Aesthetic */
 .landing-container {
-    min-height: 100vh;
+    height: 100vh;
     background: var(--navy);
     color: var(--text-inverse);
     display: flex;
     flex-direction: column;
     overflow-y: auto;
+    scroll-behavior: smooth;
+}
+
+/* Custom Scrollbar */
+.landing-container::-webkit-scrollbar {
+    width: 10px;
+}
+.landing-container::-webkit-scrollbar-track {
+    background: rgba(13, 27, 42, 0.5);
+}
+.landing-container::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    border: 2px solid var(--navy);
+}
+.landing-container::-webkit-scrollbar-thumb:hover {
+    background: var(--orange);
 }
 
 .secondary-page {
@@ -17,10 +34,10 @@
     justify-content: space-between;
     align-items: center;
     padding: 1rem 3rem;
-    background: rgba(13, 27, 42, 0.6);
-    backdrop-filter: blur(12px);
+    background: rgba(13, 27, 42, 0.7);
+    backdrop-filter: blur(16px);
     border-bottom: 1px solid rgba(255,255,255,0.05);
-    position: fixed;
+    position: sticky;
     top: 0;
     width: 100%;
     z-index: 1000;
@@ -112,11 +129,16 @@
 }
 
 .hero-buttons {
-    margin-top: 2rem;
+    margin-top: 2.5rem;
+    display: flex;
+    gap: 1.25rem;
+    justify-content: center;
+    flex-wrap: wrap;
 }
 
 .cta-btn.lg {
-    padding: 1rem 2rem;
+    height: 56px;
+    padding: 0 2.5rem;
     font-size: 1.1rem;
     border-radius: 50px;
 }
@@ -127,9 +149,11 @@
     justify-content: center;
     border: none;
     font-weight: 700;
-    transition: all 0.2s;
+    line-height: 1;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     text-decoration: none;
     cursor: pointer;
+    white-space: nowrap;
 }
 
 .cta-btn.primary {
@@ -143,13 +167,14 @@
 }
 
 .cta-btn.outline {
-    background: transparent;
-    border: 2px solid white;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
     color: white;
-    margin-left: 1rem;
 }
 .cta-btn.outline:hover {
-    background: rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.15);
+    border-color: white;
     transform: translateY(-2px);
 }
 
@@ -210,7 +235,7 @@
     display: flex;
     justify-content: center;
     align-items: flex-start;
-    padding: 120px 2rem 4rem 2rem; 
+    padding: 2rem 2rem 6rem 2rem; 
 }
 
 .page-box {

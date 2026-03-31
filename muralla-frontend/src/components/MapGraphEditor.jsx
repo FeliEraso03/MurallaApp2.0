@@ -186,16 +186,16 @@ export const MapGraphEditor = ({
                                 ],
                                 16, [
                                     'case',
-                                    ['==', ['get', 'nodeType'], 'algoSource'], 14,
-                                    ['==', ['get', 'nodeType'], 'algoSink'],   14,
+                                    ['==', ['get', 'nodeType'], 'algoSource'], 18,
+                                    ['==', ['get', 'nodeType'], 'algoSink'],   18,
                                     ['==', ['get', 'nodeType'], 'selected'],   13,
                                     10
                                 ]
                             ],
                             'circle-color': [
                                 'case',
-                                ['==', ['get', 'nodeType'], 'algoSource'], '#22d3ee',
-                                ['==', ['get', 'nodeType'], 'algoSink'],   '#f43f5e',
+                                ['==', ['get', 'nodeType'], 'algoSource'], '#00ff88',
+                                ['==', ['get', 'nodeType'], 'algoSink'],   '#ff0077',
                                 ['==', ['get', 'nodeType'], 'selected'],   '#a78bfa',
                                 ['==', ['get', 'type'], '1'], '#f59e0b',
                                 ['==', ['get', 'type'], '3'], '#ef4444',
