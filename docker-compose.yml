@@ -1,4 +1,4 @@
-version: '3.8'
+# La version tag was removed per Docker deprecation
 
 services:
   db:
@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRES_DB: muralladb
       POSTGRES_USER: muralla
-      POSTGRES_PASSWORD: muralla_password
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-muralla_password}
     ports:
       - "5432:5432"
     volumes:
@@ -26,7 +26,10 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/muralladb
       - SPRING_DATASOURCE_USERNAME=muralla
-      - SPRING_DATASOURCE_PASSWORD=muralla_password
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - JWT_SECRET=${JWT_SECRET}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
       - APP_FRONTEND_URL=http://localhost:80
     ports:
       - "8081:8081"
