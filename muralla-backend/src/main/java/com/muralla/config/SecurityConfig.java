@@ -131,7 +131,7 @@ public class SecurityConfig {
     @Bean
     public org.springframework.web.cors.CorsConfigurationSource corsConfigurationSource() {
         org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
-        configuration.setAllowedOriginPatterns(java.util.List.of("*"));
+        configuration.setAllowedOriginPatterns(java.util.List.of(frontendUrl));
         configuration.setAllowedMethods(java.util.List.of("*"));
         configuration.setAllowedHeaders(java.util.List.of("*"));
         configuration.setAllowCredentials(false);
