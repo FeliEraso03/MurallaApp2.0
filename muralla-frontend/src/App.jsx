@@ -8,10 +8,10 @@ import { useAuth } from './utils/authContext';
 import { Link } from 'react-router-dom';
 import './App.css';
 
-const CENTRO_HISTORICO = { lat: 10.425248, lng: -75.549548 };
+const CENTRO_HISTORICO = { lat: 10.4231, lng: -75.5494 };
 const BOUNDS = [
-  [CENTRO_HISTORICO.lng - 0.015, CENTRO_HISTORICO.lat - 0.015],
-  [CENTRO_HISTORICO.lng + 0.015, CENTRO_HISTORICO.lat + 0.015]
+  [CENTRO_HISTORICO.lng - 0.035, CENTRO_HISTORICO.lat - 0.025],
+  [CENTRO_HISTORICO.lng + 0.035, CENTRO_HISTORICO.lat + 0.025]
 ];
 
 // ── SVG Icons ──────────────────────────────────────────────
@@ -118,16 +118,36 @@ function App() {
         data: {
           type: 'FeatureCollection',
           features: [
-            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5495, 10.4235] }, properties: { name: 'Torre del Reloj', type: 'monument' } },
-            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5510, 10.4243] }, properties: { name: 'Plaza San Pedro Claver', type: 'plaza' } },
-            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5515, 10.4258] }, properties: { name: 'Palacio de la Inquisición', type: 'museum' } },
-            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5504, 10.4265] }, properties: { name: 'Plaza de Bolívar', type: 'plaza' } },
-            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5528, 10.4245] }, properties: { name: 'Plaza Santo Domingo', type: 'plaza' } },
-            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5460, 10.4215] }, properties: { name: 'Barrio Getsemaní', type: 'culture' } },
-            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5482, 10.4222] }, properties: { name: 'Plazuela de la Trinidad', type: 'plaza' } },
-            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5520, 10.4285] }, properties: { name: 'Las Bóvedas', type: 'history' } },
-            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5398, 10.4225] }, properties: { name: 'Castillo de San Felipe', type: 'fortress' } },
-            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5455, 10.4261] }, properties: { name: 'Mercado de Bazurto', type: 'local' } }
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.549218, 10.422979] }, properties: { name: 'Torre del Reloj', type: 'monumento' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.551322, 10.421711] }, properties: { name: 'Plaza San Pedro Claver', type: 'plaza' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.551407, 10.422688] }, properties: { name: 'Palacio de la Inquisición', type: 'museo' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.551065, 10.422956] }, properties: { name: 'Plaza de Bolívar', type: 'plaza' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.551529, 10.423189] }, properties: { name: 'Plaza Santo Domingo', type: 'plaza' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5462, 10.4209] }, properties: { name: 'Barrio Getsemaní', type: 'cultura' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.544674, 10.421867] }, properties: { name: 'Plazuela de la Trinidad', type: 'plaza' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.546457, 10.430153] }, properties: { name: 'Las Bóvedas', type: 'historia' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.540456, 10.422503] }, properties: { name: 'Castillo de San Felipe', type: 'monumento' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.525547, 10.411131] }, properties: { name: 'Mercado de Bazurto', type: 'cultura' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5539, 10.4248] }, properties: { name: 'Baluarte de Santo Domingo', type: 'historia' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5493, 10.4277] }, properties: { name: 'Baluarte de Santiago Apóstol', type: 'historia' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5507, 10.4261] }, properties: { name: 'Teatro Adolfo Mejía', type: 'cultura' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5504, 10.4231] }, properties: { name: 'Catedral de Santa Catalina', type: 'iglesia' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5530, 10.4208] }, properties: { name: 'Parque de la Marina', type: 'parque' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5460, 10.4220] }, properties: { name: 'Parque Centenario', type: 'parque' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5484, 10.4217] }, properties: { name: 'Muelle de los Pegasos', type: 'monumento' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5431, 10.4267] }, properties: { name: 'India Catalina', type: 'monumento' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5394, 10.4228] }, properties: { name: 'Zapatos Viejos', type: 'monumento' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5512, 10.4214] }, properties: { name: 'Museo de Arte Moderno', type: 'museo' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5524, 10.4211] }, properties: { name: 'Museo Naval del Caribe', type: 'museo' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5483, 10.4269] }, properties: { name: 'Iglesia de Santo Toribio', type: 'iglesia' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5256, 10.4192] }, properties: { name: 'Convento de la Popa', type: 'iglesia' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5499, 10.4283] }, properties: { name: 'Casa de García Márquez', type: 'historia' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5491, 10.4229] }, properties: { name: 'Plaza de los Coches', type: 'plaza' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5515, 10.4211] }, properties: { name: 'Baluarte de San Ignacio', type: 'historia' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5529, 10.4208] }, properties: { name: 'Baluarte de San Francisco Javier', type: 'historia' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5500, 10.4219] }, properties: { name: 'Plaza de la Aduana', type: 'plaza' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5493, 10.4229] }, properties: { name: 'Portal de los Dulces', type: 'historia' } },
+            { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5485, 10.4222] }, properties: { name: 'Camellón de los Mártires', type: 'monumento' } }
           ]
         }
       });
@@ -145,8 +165,18 @@ function App() {
         },
         paint: {
           'text-color': '#ffffff',
-          'text-halo-color': '#f77f00',
-          'text-halo-width': 1.5,
+          'text-halo-color': [
+            'match', ['get', 'type'],
+            'monumento', '#f77f00',
+            'plaza', '#3a86ff',
+            'museo', '#8338ec',
+            'historia', '#ffbe0b',
+            'cultura', '#fb5607',
+            'iglesia', '#06d6a0',
+            'parque', '#70e000',
+            '#f77f00' // Default fallback
+          ],
+          'text-halo-width': 1.8,
           'text-halo-blur': 1
         }
       });
@@ -187,6 +217,7 @@ function App() {
                 else if (el.tags.amenity === 'cafe') prefix = '[Cafe]';
                 else if (el.tags.amenity === 'bar') prefix = '[Bar]';
                 else if (el.tags.tourism === 'museum') prefix = '[Museo]';
+                else if (el.tags.tourism === 'viewpoint') prefix = '[Mirador]';
                 
                 return {
                   type: 'Feature',
