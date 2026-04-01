@@ -22,7 +22,7 @@ public class UserPreference {
     @JoinColumn(name = "user_id")
     private User user;
 
-    /** Hours available for the tour route (2, 4, 6, 8) */
+    /** Hours available for the tour route (1, 2, 4, 6, 8, 10) */
     private Integer defaultTimeAvailableHours;
 
     /** Mobility type: "WALK" | "MULTI" */
@@ -36,6 +36,9 @@ public class UserPreference {
 
     /** Age range: "18-25" | "26-35" | "36-50" | "50+" */
     private String ageRange;
+
+    /** Gender (optional): "MALE" | "FEMALE" | "NON_DISCLOSED" | "OTHER" */
+    private String gender;
 
     // ── Interest weights 1-10 ──────────────────────────
 

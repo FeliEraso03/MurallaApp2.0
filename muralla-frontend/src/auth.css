@@ -135,7 +135,9 @@
   flex-direction: column;
   justify-content: center;
   padding: 2rem 2.5rem;
-  background: var(--navy-mid);
+  background: rgba(14, 25, 41, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-left: 1px solid rgba(255, 255, 255, 0.06);
   overflow-y: auto;
 }
@@ -213,6 +215,27 @@
   border-color: var(--orange);
   background: rgba(247, 127, 0, 0.05);
   box-shadow: 0 0 0 3px rgba(247, 127, 0, 0.15);
+}
+
+/* Fix for native select dropdowns in dark mode */
+.auth-input option {
+  background-color: #1a1a1a;
+  color: #ffffff;
+  padding: 10px;
+}
+
+select.auth-input {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.4)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat !important;
+  background-position: calc(100% - 14px) center !important;
+  background-size: 16px !important;
+  cursor: pointer;
+  padding-right: 40px;
+}
+
+select.auth-input:focus {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(247,127,0,1)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
 }
 
 .auth-input.error {
@@ -368,6 +391,61 @@
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Profile Enhancements ─────────────────────────*/
+.profile-section-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--orange);
+  margin: 2.5rem 0 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.profile-section-title::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to right, rgba(247, 127, 0, 0.3), transparent);
+}
+
+.password-section {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+}
+
+.btn-ghost {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.btn-ghost.active {
+  background: rgba(247, 127, 0, 0.1);
+  color: var(--orange);
+  border-color: rgba(247, 127, 0, 0.3);
+}
 
 /* ════════════════════════════════════════════════════
    PREFERENCES WIZARD

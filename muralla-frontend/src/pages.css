@@ -1,28 +1,12 @@
 /* Pages CSS - V2 Aesthetic */
 .landing-container {
-    height: 100vh;
+    min-height: 100vh;
     background: var(--navy);
     color: var(--text-inverse);
     display: flex;
     flex-direction: column;
     overflow-y: auto;
     scroll-behavior: smooth;
-}
-
-/* Custom Scrollbar */
-.landing-container::-webkit-scrollbar {
-    width: 10px;
-}
-.landing-container::-webkit-scrollbar-track {
-    background: rgba(13, 27, 42, 0.5);
-}
-.landing-container::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    border: 2px solid var(--navy);
-}
-.landing-container::-webkit-scrollbar-thumb:hover {
-    background: var(--orange);
 }
 
 .secondary-page {

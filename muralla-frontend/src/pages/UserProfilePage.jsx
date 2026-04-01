@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../utils/authContext';
-import { User, Map, Save, ArrowLeft, Settings2 } from 'lucide-react';
+import { User, Map, Save, ArrowLeft, Settings2, Lock, ShieldCheck } from 'lucide-react';
 import '../auth.css';
 
 export function UserProfilePage() {
@@ -12,11 +12,19 @@ export function UserProfilePage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
   
-  // State for the editable form
   const [form, setForm] = useState({
     fullName: '',
     touristType: '',
-    ageRange: ''
+    ageRange: '',
+    gender: ''
+  });
+
+  // State for password change
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
   });
 
   // State for read-only user info
@@ -36,7 +44,8 @@ export function UserProfilePage() {
           setForm({
             fullName: data.fullName || '',
             touristType: data.preferences?.touristType || '',
-            ageRange: data.preferences?.ageRange || ''
+            ageRange: data.preferences?.ageRange || '',
+            gender: data.preferences?.gender || ''
           });
         }
       } catch (err) {
@@ -52,6 +61,10 @@ export function UserProfilePage() {
     setForm(f => ({ ...f, [e.target.name]: e.target.value }));
   };
 
+  const handlePasswordChangeInput = (e) => {
+    setPasswordForm(f => ({ ...f, [e.target.name]: e.target.value }));
+  };
+
   const handleSave = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -62,6 +75,43 @@ export function UserProfilePage() {
       setMessage({ text: 'Perfil actualizado correctamente.', type: 'success' });
     } catch (err) {
       setMessage({ text: err.message || 'Error al guardar el perfil.', type: 'error' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handlePasswordSubmit = async (e) => {
+    e.preventDefault();
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setMessage({ text: 'Las contraseñas no coinciden.', type: 'error' });
+      return;
+    }
+    setSaving(true);
+    setMessage({ text: '', type: '' });
+
+    try {
+      const resp = await fetch('http://localhost:8081/api/users/change-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          currentPassword: passwordForm.currentPassword,
+          newPassword: passwordForm.newPassword
+        })
+      });
+
+      if (resp.ok) {
+        setMessage({ text: 'Contraseña actualizada correctamente.', type: 'success' });
+        setShowPasswordForm(false);
+        setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      } else {
+        const errorText = await resp.text();
+        setMessage({ text: errorText || 'Error al actualizar contraseña.', type: 'error' });
+      }
+    } catch (err) {
+      setMessage({ text: 'Error de conexión.', type: 'error' });
     } finally {
       setSaving(false);
     }
@@ -107,7 +157,9 @@ export function UserProfilePage() {
               {!profilePicture && <User size={40} color="var(--orange)" />}
             </div>
             <div>
-              <h2 className="auth-form-title" style={{ marginBottom: '4px' }}>Perfil de Viajero</h2>
+              <h2 className="auth-form-title" style={{ marginBottom: '4px' }}>
+                {form.fullName ? `Hola, ${form.fullName.split(' ')[0]}` : 'Perfil de Viajero'}
+              </h2>
               <p className="auth-form-subtitle" style={{ margin: 0, fontWeight: 500 }}>{email}</p>
             </div>
           </div>
@@ -123,6 +175,8 @@ export function UserProfilePage() {
           )}
 
           <form onSubmit={handleSave}>
+            <div className="profile-section-title">Información Personal</div>
+
             <div className="auth-field">
               <label className="auth-label">Nombre Completo</label>
               <div className="auth-input-wrap">
@@ -137,6 +191,27 @@ export function UserProfilePage() {
                 />
               </div>
             </div>
+
+            <div className="auth-field">
+              <label className="auth-label">Género (Opcional)</label>
+              <div className="auth-input-wrap">
+                <span className="auth-input-icon"><User size={16} /></span>
+                <select
+                  name="gender"
+                  className="auth-input"
+                  value={form.gender}
+                  onChange={handleChange}
+                >
+                  <option value="">Seleccionar...</option>
+                  <option value="MALE">Masculino</option>
+                  <option value="FEMALE">Femenino</option>
+                  <option value="OTHER">Otro</option>
+                  <option value="NON_DISCLOSED">Prefiero no decirlo</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="profile-section-title">Análisis Turístico</div>
 
             <div className="auth-field">
               <label className="auth-label">Naturaleza del visitante (Análisis demográfico)</label>
@@ -177,10 +252,77 @@ export function UserProfilePage() {
               </div>
             </div>
 
-            <button type="submit" className="auth-submit-btn" disabled={saving}>
-              {saving ? <><span className="auth-spinner" /> Guardando...</> : <><Save size={18}/> Guardar Cambios</>}
+            <button type="submit" className="auth-submit-btn" disabled={saving} style={{ marginTop: '2rem' }}>
+              {saving ? <><span className="auth-spinner" /> Guardando...</> : <><Save size={18}/> Guardar Perfil</>}
             </button>
           </form>
+
+          <div className="profile-section-title">Seguridad</div>
+          
+          {!showPasswordForm ? (
+            <button 
+              className="btn-ghost" 
+              onClick={() => setShowPasswordForm(true)}
+              style={{ width: '100%', justifyContent: 'center' }}
+            >
+              <Lock size={16} /> Cambiar Contraseña
+            </button>
+          ) : (
+            <div className="password-section">
+              <form onSubmit={handlePasswordSubmit}>
+                <div className="auth-field">
+                  <label className="auth-label">Contraseña Actual</label>
+                  <div className="auth-input-wrap">
+                    <span className="auth-input-icon"><Lock size={16} /></span>
+                    <input
+                      type="password"
+                      name="currentPassword"
+                      className="auth-input"
+                      value={passwordForm.currentPassword}
+                      onChange={handlePasswordChangeInput}
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="auth-field">
+                  <label className="auth-label">Nueva Contraseña</label>
+                  <div className="auth-input-wrap">
+                    <span className="auth-input-icon"><ShieldCheck size={16} /></span>
+                    <input
+                      type="password"
+                      name="newPassword"
+                      className="auth-input"
+                      value={passwordForm.newPassword}
+                      onChange={handlePasswordChangeInput}
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="auth-field">
+                  <label className="auth-label">Confirmar Nueva Contraseña</label>
+                  <div className="auth-input-wrap">
+                    <span className="auth-input-icon"><ShieldCheck size={16} /></span>
+                    <input
+                      type="password"
+                      name="confirmPassword"
+                      className="auth-input"
+                      value={passwordForm.confirmPassword}
+                      onChange={handlePasswordChangeInput}
+                      required
+                    />
+                  </div>
+                </div>
+                <div style={{ display: 'flex', gap: '10px', marginTop: '1rem' }}>
+                  <button type="button" className="btn-ghost" onClick={() => setShowPasswordForm(false)} style={{ flex: 1, justifyContent: 'center' }}>
+                    Cancelar
+                  </button>
+                  <button type="submit" className="auth-submit-btn" disabled={saving} style={{ flex: 2, margin: 0 }}>
+                    Actualizar
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
 
           <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.1)', textAlign: 'center' }}>
             <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.9rem', marginBottom: '1rem' }}>

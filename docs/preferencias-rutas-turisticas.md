@@ -1,4 +1,4 @@
-# Preferencias de Rutas Turísticas — MurallaApp 2.0
+# Preferencias de Rutas Turísticas — Muralla App 2.0
 
 > **Documento de diseño** — Define las dimensiones, categorías y metodología de captura de preferencias turísticas para la personalización de rutas en el Centro Histórico de Cartagena de Indias.
 
@@ -31,12 +31,16 @@ Cada categoría recibe un peso de **1 (poco interés)** a **10 (máximo interés
 Mide el atractivo por el patrimonio construido y la historia colonial.
 
 **POIs representativos:**
-- Murallas de Cartagena (Baluartes San Francisco Javier, Santiago, Santa Catalina)
+- Baluarte de Santo Domingo (Baluarte de Santiago Apóstol, San Ignacio)
 - Castillo de San Felipe de Barajas
 - Museo del Oro Zenú (Banco de la República)
-- Casa de la Inquisición - Palacio de la Inquisición
+- Palacio de la Inquisición
 - Museo de Arte Moderno de Cartagena
-- Claustro de La Merced / Teatro Adolfo Mejía
+- Teatro Adolfo Mejía
+- Las Bóvedas
+- Casa de García Márquez
+- India Catalina
+- Camellón de los Mártires
 
 **Pregunta de captura:** *"¿Qué tan interesado estás en visitar museos, murallas, plazas históricas y sitios del patrimonio colonial?"*
 
@@ -46,12 +50,11 @@ Mide el atractivo por el patrimonio construido y la historia colonial.
 Mide el atractivo por templos, conventos y sitios de devoción.
 
 **POIs representativos:**
-- Catedral de Santa Catalina de Alejandría
-- Iglesia y Convento de San Pedro Claver
-- Iglesia de Santo Domingo (La Volteada)
-- Iglesia de La Trinidad (Getsemaní)
-- Convento de La Popa
-- Santuario de nuestra señora de la Candelaria
+- Catedral de Santa Catalina
+- Iglesia de San Pedro Claver
+- Iglesia de Santo Toribio
+- Convento de la Popa
+- Basílica Menor de Santa Catalina de Alejandría (Catedral)
 
 **Pregunta de captura:** *"¿Qué tanto valoras en tu recorrido los templos, conventos e iglesias históricas?"*
 
@@ -91,12 +94,13 @@ Mide el interés en parques, plazas al aire libre y espacios verdes.
 Mide el interés en arte urbano, artesanías y expresiones culturales contemporáneas.
 
 **POIs representativos:**
-- Barrio Getsemaní (arte mural / graffiti cultural)
-- Plaza de la Trinidad (vida bohemia, artistas locales)
-- Mercado de Artesanías - Portal de los Dulces
-- Las Bóvedas (tiendas de artesanías y joyería)
+- Barrio Getsemaní (Arte mural / Graffiti cultural)
+- Plazuela de la Trinidad (Vida bohemia, artistas locales)
+- Portal de los Dulces (Plaza de los Coches)
+- Las Bóvedas (Galerías de artesanías)
 - Galerías de Arte del Centro Histórico
 - Centro de Formación de la Cooperación Española
+- Mercado de Bazurto (Cultura viva)
 
 **Pregunta de captura:** *"¿Te interesan los espacios de arte, artesanías y cultura viva del barrio Getsemaní?"*
 
@@ -116,6 +120,31 @@ Mide la disposición a recorrer rutas menos transitadas, callejones y zonas emer
 
 ---
 
+### 2.3 Perfil Demográfico y Análisis Turístico
+
+Nueva dimensión para la segmentación de rutas y análisis estadístico del comportamiento del visitante.
+
+#### 📍 Naturaleza del Visitante (`touristType`)
+Segmenta según el origen geográfico para priorizar información relevante.
+
+| Valor | Descripción |
+|-------|-------------|
+| `LOCAL` | Residente en Cartagena — conoce la ciudad, busca rutas de nicho |
+| `NATIONAL` | Visitante de Colombia — interés en hitos nacionales |
+| `INTERNATIONAL` | Visitante extranjero — requiere contexto histórico profundo |
+
+---
+
+#### 👤 Género (`gender`)
+Dato opcional para la personalización de sugerencias comerciales (gastronomía, compras).
+
+- `MALE` | Masculino
+- `FEMALE` | Femenino
+- `OTHER` | Otro
+- `NON_DISCLOSED` | Prefiero no decirlo
+
+---
+
 ### 2.2 Parámetros Logísticos
 
 #### ⏰ Tiempo Disponible (`defaultTimeAvailableHours`)
@@ -123,10 +152,12 @@ Duración disponible del usuario para completar la ruta.
 
 | Valor | Descripción |
 |-------|-------------|
-| 2h    | Recorrido express — principales hitos |
-| 4h    | Recorrido estándar — centro + Getsemaní |
-| 6h    | Recorrido completo — incluye murallas y museos |
-| 8h+   | Día completo — recorrido profundo con paradas gastronómicas |
+| 1h    | Recorrido rápido — hitos esenciales de una sola zona |
+| 2h    | Recorrido express — principales hitos del centro |
+| 4h    | Recorrido estándar — centro + Getsemaní básico |
+| 6h    | Recorrido extendido — incluye murallas y museos principales |
+| 8h    | Recorrido completo — jornada profunda |
+| 10h+  | Día entero — inmersión total en el casco histórico y Getsemaní |
 
 **Impacto en el grafo:** Actúa como restricción de tiempo máxima en la función objetivo del P-graph.
 
@@ -183,9 +214,12 @@ public class UserPreference {
     private Integer interestArts;         // 1-10 → Arte vivo / Artesanías
     private Integer interestAdventure;    // 1-10 → Exploración/Aventura
     
-    private Integer defaultTimeAvailableHours; // 2 | 4 | 6 | 8
+    private Integer defaultTimeAvailableHours; // 1 | 2 | 4 | 6 | 8 | 10
     private String  mobilityType;              // "WALK" | "MULTI"
     private String  groupType;                 // "SOLO" | "COUPLE" | "FAMILY" | "GROUP"
+    private String  touristType;               // "LOCAL" | "NATIONAL" | "INTERNATIONAL"
+    private String  ageRange;                  // "18-25" | "26-35" | "36-50" | "50+"
+    private String  gender;                    // "MALE" | "FEMALE" | "OTHER" | "NON_DISCLOSED"
 }
 ```
 
@@ -211,10 +245,10 @@ peso_nodo = peso_base × max(interestCategoría_i)
 
 ## 6. Consideraciones de UX en la Captura
 
-- El formulario se presenta como un **wizard de 3 pasos** (onboarding post-registro):
-  - **Paso 1:** Datos básicos (nombre, tiempo, tipo de grupo)
-  - **Paso 2:** Intereses culturales y temáticos (sliders)
-  - **Paso 3:** Confirmación y avatar de perfil de viajero generado
+- El formulario se presenta como un **wizard de 3 pasos** (onboarding post-registro), pero también se gestiona de forma centralizada en la vista de **Perfil de Usuario (`/profile`)**:
+  - **Paso 1:** Datos básicos (nombre, tiempo, tipo de grupo, **género**, **origen**)
+  - **Paso 2:** Intereses culturales y temáticos (sliders 1-10)
+  - **Paso 3:** Confirmación y guardado seguro del perfil.
 
 - El usuario puede **modificar sus preferencias** en cualquier momento desde el panel de usuario dentro de la aplicación.
 

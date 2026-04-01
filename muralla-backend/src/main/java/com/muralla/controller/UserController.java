@@ -1,13 +1,16 @@
 package com.muralla.controller;
 
+import com.muralla.dto.PasswordChangeRequest;
 import com.muralla.dto.PreferenceRequest;
 import com.muralla.model.User;
 import com.muralla.model.UserPreference;
 import com.muralla.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -16,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     /**
      * GET /api/users/me — returns the current user's preferences.
@@ -61,6 +65,8 @@ public class UserController {
             pref.setTouristType(req.getTouristType());
         if (req.getAgeRange() != null)
             pref.setAgeRange(req.getAgeRange());
+        if (req.getGender() != null)
+            pref.setGender(req.getGender());
         if (req.getInterestCulture() != null)
             pref.setInterestCulture(req.getInterestCulture());
         if (req.getInterestReligion() != null)
@@ -78,6 +84,28 @@ public class UserController {
         userRepository.save(user);
 
         return ResponseEntity.ok(buildResponse(user));
+    }
+
+    /**
+     * POST /api/users/change-password — update the current user's password.
+     */
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody PasswordChangeRequest req
+    ) {
+        User user = userRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // Validate current password
+        if (!passwordEncoder.matches(req.getCurrentPassword(), user.getPassword())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("La contraseña actual es incorrecta.");
+        }
+
+        user.setPassword(passwordEncoder.encode(req.getNewPassword()));
+        userRepository.save(user);
+
+        return ResponseEntity.ok("Contraseña actualizada correctamente.");
     }
 
     private Object buildResponse(User user) {
