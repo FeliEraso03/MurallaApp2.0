@@ -291,7 +291,13 @@ function App() {
         }
       });
     })
-    .catch(err => console.error("Error cargando POIs dinámicos de Overpass:", err));
+    .catch(err => {
+      if (err.message.includes('504')) {
+        console.warn("Overpass API está temporalmente sobrecargada (504). Los puntos dinámicos no se mostrarán.");
+      } else {
+        console.error("Error cargando POIs dinámicos de Overpass:", err);
+      }
+    });
   };
 
   useEffect(() => {

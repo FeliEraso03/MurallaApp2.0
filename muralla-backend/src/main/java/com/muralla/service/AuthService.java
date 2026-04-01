@@ -32,6 +32,7 @@ public class AuthService {
                 .groupType(request.getGroupType() != null ? request.getGroupType() : "SOLO")
                 .touristType(request.getTouristType())
                 .ageRange(request.getAgeRange())
+                .gender(request.getGender())
                 .interestCulture(orDefault(request.getInterestCulture(), 5))
                 .interestReligion(orDefault(request.getInterestReligion(), 5))
                 .interestGastronomy(orDefault(request.getInterestGastronomy(), 5))

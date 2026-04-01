@@ -134,17 +134,25 @@ export function RegisterPage() {
     email: "",
     password: "",
     confirm: "",
+    // Optional preferences
+    gender: "",
+    ageRange: "",
+    touristType: "",
+    mobilityType: "WALK",
+    defaultTimeAvailableHours: 4,
   });
   const [profilePicture, setProfilePicture] = useState(null);
   const [showPass, setShowPass] = useState(false);
+  const [showOptional, setShowOptional] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
 
   const handleChange = (e) => {
-    setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    setForm((f) => ({ ...f, [name]: value }));
     setError("");
-    setFieldErrors((fe) => ({ ...fe, [e.target.name]: "" }));
+    setFieldErrors((fe) => ({ ...fe, [name]: "" }));
   };
 
   const validate = () => {
@@ -168,12 +176,11 @@ export function RegisterPage() {
     setLoading(true);
     try {
       await register({
-        fullName: form.fullName,
-        email: form.email,
-        password: form.password,
+        ...form,
         profilePictureUrl: profilePicture,
       });
-      // Redirect to preferences wizard after registration
+      // Skip wizard if they already filled optional stuff? 
+      // Actually, let's still go to preferences just in case they want to adjust weights.
       navigate("/preferences");
     } catch (err) {
       setError(err.message || "Error al crear la cuenta.");
@@ -529,6 +536,99 @@ export function RegisterPage() {
               )}
             </div>
 
+            {/* Optional Preferences Section */}
+            <div style={{ marginTop: '1rem', marginBottom: '1.5rem' }}>
+              <button
+                type="button"
+                onClick={() => setShowOptional(!showOptional)}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.1)',
+                  borderRadius: '12px',
+                  color: 'rgba(255,255,255,0.8)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  cursor: 'pointer',
+                  fontSize: '0.9rem',
+                  fontWeight: '500'
+                }}
+              >
+                <span>Configuración del Viaje (Opcional)</span>
+                <svg 
+                  width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" 
+                  style={{ transform: showOptional ? 'rotate(180deg)' : 'none', transition: 'transform 0.3s' }}
+                >
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </button>
+
+              {showOptional && (
+                <div style={{ 
+                  marginTop: '1rem', 
+                  padding: '1.5rem', 
+                  background: 'rgba(255,255,255,0.02)', 
+                  borderRadius: '12px', 
+                  border: '1px solid rgba(255,255,255,0.05)',
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: '12px',
+                  animation: 'slideDown 0.3s ease-out'
+                }}>
+                  <div className="auth-field" style={{ gridColumn: 'span 2', marginBottom: 0 }}>
+                    <label className="auth-label">Género</label>
+                    <select name="gender" className="auth-input" value={form.gender} onChange={handleChange} style={{ paddingLeft: '12px', appearance: 'auto' }}>
+                      <option value="">Prefiero no decirlo</option>
+                      <option value="MALE">Masculino</option>
+                      <option value="FEMALE">Femenino</option>
+                      <option value="OTHER">Otro</option>
+                    </select>
+                  </div>
+
+                  <div className="auth-field" style={{ marginBottom: 0 }}>
+                    <label className="auth-label">Edad</label>
+                    <select name="ageRange" className="auth-input" value={form.ageRange} onChange={handleChange} style={{ paddingLeft: '12px', appearance: 'auto' }}>
+                      <option value="">No especificado</option>
+                      <option value="18-25">18-25 años</option>
+                      <option value="26-35">26-35 años</option>
+                      <option value="36-50">36-50 años</option>
+                      <option value="50+">Más de 50</option>
+                    </select>
+                  </div>
+
+                  <div className="auth-field" style={{ marginBottom: 0 }}>
+                    <label className="auth-label">Turista</label>
+                    <select name="touristType" className="auth-input" value={form.touristType} onChange={handleChange} style={{ paddingLeft: '12px', appearance: 'auto' }}>
+                      <option value="">No especificado</option>
+                      <option value="LOCAL">Local</option>
+                      <option value="NATIONAL">Nacional</option>
+                      <option value="INTERNATIONAL">Internacional</option>
+                    </select>
+                  </div>
+
+                  <div className="auth-field" style={{ marginBottom: 0 }}>
+                    <label className="auth-label">Movilidad</label>
+                    <select name="mobilityType" className="auth-input" value={form.mobilityType} onChange={handleChange} style={{ paddingLeft: '12px', appearance: 'auto' }}>
+                      <option value="WALK">Caminata</option>
+                      <option value="MULTI">Múltiple</option>
+                    </select>
+                  </div>
+
+                  <div className="auth-field" style={{ marginBottom: 0 }}>
+                    <label className="auth-label">Horas</label>
+                    <select name="defaultTimeAvailableHours" className="auth-input" value={form.defaultTimeAvailableHours} onChange={handleChange} style={{ paddingLeft: '12px', appearance: 'auto' }}>
+                      <option value={2}>2 horas</option>
+                      <option value={4}>4 horas</option>
+                      <option value={6}>6 horas</option>
+                      <option value={8}>8 horas</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+            </div>
+
             <button
               type="submit"
               id="register-submit-btn"
@@ -540,7 +640,7 @@ export function RegisterPage() {
                   <span className="auth-spinner" /> Creando cuenta...
                 </>
               ) : (
-                "Crear cuenta y configurar mis preferencias →"
+                "Crear cuenta y confirmar →"
               )}
             </button>
           </form>

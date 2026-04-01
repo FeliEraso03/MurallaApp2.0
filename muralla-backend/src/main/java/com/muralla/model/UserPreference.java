@@ -20,6 +20,7 @@ public class UserPreference {
 
     @OneToOne
     @JoinColumn(name = "user_id")
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private User user;
 
     /** Hours available for the tour route (1, 2, 4, 6, 8, 10) */

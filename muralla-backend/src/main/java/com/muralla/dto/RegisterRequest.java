@@ -21,6 +21,7 @@ public class RegisterRequest {
     private String  groupType;
     private String  touristType;
     private String  ageRange;
+    private String  gender;
     private Integer interestCulture;
     private Integer interestReligion;
     private Integer interestGastronomy;
