@@ -69,8 +69,8 @@ export const AboutUs = () => {
                             marginBottom: '4rem'
                         }}>
                             {[
-                                { name: "Elias Mieles", role: "Software Engineer / Lead UI" },
-                                { name: "Juan Felipe Eraso", role: "Software Engineer / Backend Logic" }
+                                { name: "Juan Felipe Eraso Navarro", role: "Junior Software Engineer" },
+                                { name: "Elias David Mieles Gomez", role: "Junior Software Engineer" }
                             ].map((m, i) => (
                                 <div key={i} className="team-card glass-container" style={{padding: '2rem', textAlign: 'center', minWidth: '280px', border: '1px solid var(--orange)'}}>
                                     <div style={{display: 'flex', justifyContent: 'center', marginBottom: '1rem'}}>
