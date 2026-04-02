@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import { MapGraphEditor } from './components/MapGraphEditor';
+import { MapLabels } from './components/MapLabels';
 import { ElementModal } from './components/ElementModal';
 import { parseResolveGraphOutput } from './utils/Wdg2PnsParser';
 import { useAuth } from './utils/authContext';
@@ -13,6 +14,9 @@ const BOUNDS = [
   [CENTRO_HISTORICO.lng - 0.035, CENTRO_HISTORICO.lat - 0.025],
   [CENTRO_HISTORICO.lng + 0.035, CENTRO_HISTORICO.lat + 0.025]
 ];
+
+const STYLE_DARK = 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json';
+const STYLE_LIBERTY = 'https://tiles.openfreemap.org/styles/liberty';
 
 // ── SVG Icons ──────────────────────────────────────────────
 const IconNode = () => (
@@ -90,214 +94,132 @@ function App() {
   const [routeSolutions, setRouteSolutions] = useState([]);
   const [activeSolution, setActiveSolution] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [showGrid, setShowGrid] = useState(true);
+  const [showGrid, setShowGrid] = useState(false);
+  const [isGridLoading, setIsGridLoading] = useState(false);
   const [showDirection, setShowDirection] = useState(false);
   const [isDirected, setIsDirected] = useState(false);
   const [algorithmMode, setAlgorithmMode] = useState('NONE'); // 'NONE' | 'DIJKSTRA' | 'FORD_FULKERSON'
   const [algorithmSelectedNodes, setAlgorithmSelectedNodes] = useState([]);
+  
+  // ── Unified 2D/3D States ──────────────────────────────────
+  const [mapStyle, setMapStyle] = useState(STYLE_DARK);
+  const [is3DMode, setIs3DMode] = useState(false);
+  const [is3DLoading, setIs3DLoading] = useState(false);
+  const [buildingOpacity, setBuildingOpacity] = useState(1.0);
+  const [graphOpacity, setGraphOpacity] = useState(1.0);
+  const [gridOpacity, setGridOpacity] = useState(0.4);
+
+  // ── POI Labels State ─────────────────────────────────────
+  const [showLabels, setShowLabels] = useState(false);
+  const [isLabelsLoading, setIsLabelsLoading] = useState(false);
+
+  // Use a ref to always have the latest style in map callbacks
+  const mapStyleRef = useRef(mapStyle);
+  useEffect(() => {
+    mapStyleRef.current = mapStyle;
+  }, [mapStyle]);
 
   // Initialize MapLibre
   useEffect(() => {
-    if (mapInstance) return;
-
+    let m;
     const initMap = async () => {
-      try {
-        const response = await fetch('https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json');
-        const style = await response.json();
-        
-        // Ensure glyphs are present for text rendering
-        if (!style.glyphs) {
-          style.glyphs = 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf';
-        }
+      if (mapContainer.current.innerHTML !== '') return;
 
-        const m = new maplibregl.Map({
+      try {
+        m = new maplibregl.Map({
           container: mapContainer.current,
-          style: style,
+          style: mapStyleRef.current,
           center: [CENTRO_HISTORICO.lng, CENTRO_HISTORICO.lat],
           zoom: 16,
-          maxBounds: BOUNDS
+          maxBounds: BOUNDS,
+          antialias: true,
+          maxPitch: 85,
+          dragRotate: false,
+          transformRequest: (url, resourceType) => {
+            // Estabilización global de fuentes (Glyphs)
+            if (resourceType === 'Glyphs') {
+              const lowerUrl = url.toLowerCase();
+              const isBold = lowerUrl.includes('bold') || lowerUrl.includes('medium');
+              const font = isBold ? 'Noto Sans Bold' : 'Noto Sans Regular';
+              const rangeMatch = url.match(/\/(\d+-\d+\.pbf.*)$/);
+              const range = rangeMatch ? rangeMatch[1] : '0-255.pbf';
+              return { url: `https://tiles.openfreemap.org/fonts/${encodeURIComponent(font)}/${range}` };
+            }
+          }
         });
 
         m.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
         
+        m.on('styleimagemissing', (e) => {
+          // Silenciar warnings de iconos faltantes del basemap
+        });
+
         m.on('load', () => {
           setMapInstance(m);
-          setupMapLayers(m);
         });
       } catch (err) {
         console.error("Error initializing map style:", err);
-        // Fallback to basic initialization if fetch fails
-        const m = new maplibregl.Map({
-          container: mapContainer.current,
-          style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
-          center: [CENTRO_HISTORICO.lng, CENTRO_HISTORICO.lat],
-          zoom: 16,
-          maxBounds: BOUNDS
-        });
-        m.on('load', () => {
-          setMapInstance(m);
-          setupMapLayers(m);
-        });
       }
     };
 
     initMap();
 
     return () => {
-      if (mapInstance) {
-        mapInstance.remove();
+      if (m) {
+        m.remove();
+        setMapInstance(null);
       }
     };
-  }, [mapInstance]);
+  }, []);
 
-  const setupMapLayers = (m) => {
-    if (!m) return;
+  const appliedStyle = useRef(mapStyle);
+  useEffect(() => {
+    if (mapInstance && appliedStyle.current !== mapStyle) {
+      // Ocultado preventivo de etiquetas antes del proceso de cambio de estilo
+      try {
+        if (mapInstance.getLayer('cartagena-poi-labels')) mapInstance.setLayoutProperty('cartagena-poi-labels', 'visibility', 'none');
+        if (mapInstance.getLayer('osm-dynamic-poi-labels')) mapInstance.setLayoutProperty('osm-dynamic-poi-labels', 'visibility', 'none');
+      } catch (e) {}
 
-    // Add high-contrast custom POIs for Cartagena
-    m.addSource('cartagena-pois', {
-      type: 'geojson',
-      data: {
-        type: 'FeatureCollection',
-        features: [
-          { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.549218, 10.422979] }, properties: { name: 'Torre del Reloj', type: 'monumento' } },
-          { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.551322, 10.421711] }, properties: { name: 'Plaza San Pedro Claver', type: 'plaza' } },
-          { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.551407, 10.422688] }, properties: { name: 'Palacio de la Inquisición', type: 'museo' } },
-          { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.551065, 10.422956] }, properties: { name: 'Plaza de Bolívar', type: 'plaza' } },
-          { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.551529, 10.423189] }, properties: { name: 'Plaza Santo Domingo', type: 'plaza' } },
-          { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5462, 10.4209] }, properties: { name: 'Barrio Getsemaní', type: 'cultura' } },
-          { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.544674, 10.421867] }, properties: { name: 'Plazuela de la Trinidad', type: 'plaza' } },
-          { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.546457, 10.430153] }, properties: { name: 'Las Bóvedas', type: 'historia' } },
-          { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.540456, 10.422503] }, properties: { name: 'Castillo de San Felipe', type: 'monumento' } },
-          { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.525547, 10.411131] }, properties: { name: 'Mercado de Bazurto', type: 'cultura' } },
-          { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5539, 10.4248] }, properties: { name: 'Baluarte de Santo Domingo', type: 'historia' } },
-          { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5493, 10.4277] }, properties: { name: 'Baluarte de Santiago Apóstol', type: 'historia' } },
-          { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5507, 10.4261] }, properties: { name: 'Teatro Adolfo Mejía', type: 'cultura' } },
-          { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5504, 10.4231] }, properties: { name: 'Catedral de Santa Catalina', type: 'iglesia' } },
-          { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5530, 10.4208] }, properties: { name: 'Parque de la Marina', type: 'parque' } },
-          { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5460, 10.4220] }, properties: { name: 'Parque Centenario', type: 'parque' } },
-          { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5484, 10.4217] }, properties: { name: 'Muelle de los Pegasos', type: 'monumento' } },
-          { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5431, 10.4267] }, properties: { name: 'India Catalina', type: 'monumento' } },
-          { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5394, 10.4228] }, properties: { name: 'Zapatos Viejos', type: 'monumento' } },
-          { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5512, 10.4214] }, properties: { name: 'Museo de Arte Moderno', type: 'museo' } },
-          { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5524, 10.4211] }, properties: { name: 'Museo Naval del Caribe', type: 'museo' } },
-          { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5483, 10.4269] }, properties: { name: 'Iglesia de Santo Toribio', type: 'iglesia' } },
-          { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5256, 10.4192] }, properties: { name: 'Convento de la Popa', type: 'iglesia' } },
-          { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5499, 10.4283] }, properties: { name: 'Casa de García Márquez', type: 'historia' } },
-          { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5491, 10.4229] }, properties: { name: 'Plaza de los Coches', type: 'plaza' } },
-          { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5515, 10.4211] }, properties: { name: 'Baluarte de San Ignacio', type: 'historia' } },
-          { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5529, 10.4208] }, properties: { name: 'Baluarte de San Francisco Javier', type: 'historia' } },
-          { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5500, 10.4219] }, properties: { name: 'Plaza de la Aduana', type: 'plaza' } },
-          { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5493, 10.4229] }, properties: { name: 'Portal de los Dulces', type: 'historia' } },
-          { type: 'Feature', geometry: { type: 'Point', coordinates: [-75.5485, 10.4222] }, properties: { name: 'Camellón de los Mártires', type: 'monumento' } }
-        ]
-      }
-    });
-
-    m.addLayer({
-      id: 'cartagena-poi-labels',
-      type: 'symbol',
-      source: 'cartagena-pois',
-      layout: {
-        'text-field': '{name}',
-        'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'],
-        'text-size': 13,
-        'text-anchor': 'bottom',
-        'text-offset': [0, -1]
-      },
-      paint: {
-        'text-color': '#ffffff',
-        'text-halo-color': [
-          'match', ['get', 'type'],
-          'monumento', '#f77f00',
-          'plaza', '#3a86ff',
-          'museo', '#8338ec',
-          'historia', '#ffbe0b',
-          'cultura', '#fb5607',
-          'iglesia', '#06d6a0',
-          'parque', '#70e000',
-          '#f77f00' // Default fallback
-        ],
-        'text-halo-width': 1.8,
-        'text-halo-blur': 1
-      }
-    });
-    
-    // Make roads pop even more by lightening the highway layer of the basemap
-    if (m.getLayer('highway_name_other')) {
-      m.setPaintProperty('highway_name_other', 'text-color', '#00b4d8');
-      m.setPaintProperty('highway_name_other', 'text-halo-color', '#000000');
+      appliedStyle.current = mapStyle;
+      mapInstance.setStyle(mapStyle);
     }
+  }, [mapStyle, mapInstance]);
 
-    // ── LIVE OVERPASS API POIS (Restaurants, Bars, Museums) ──
-    const overpassQuery = `
-      [out:json][timeout:25];
-      (
-        node["amenity"="restaurant"](10.415,-75.555,10.430,-75.540);
-        node["amenity"="cafe"](10.415,-75.555,10.430,-75.540);
-        node["amenity"="bar"](10.415,-75.555,10.430,-75.540);
-        node["tourism"="museum"](10.415,-75.555,10.430,-75.540);
-      );
-      out body;
-    `;
+  // Handle 3D Mode Transitions (Pitch & Bearing) with loading overlay
+  useEffect(() => {
+    if (!mapInstance) return;
+    if (is3DMode) {
+      setIs3DLoading(true);
+      mapInstance.dragRotate.enable();
+      mapInstance.easeTo({ pitch: 80, bearing: -15, duration: 1000 });
+      // Give layers time to render before hiding the overlay
+      const t = setTimeout(() => setIs3DLoading(false), 1400);
+      return () => clearTimeout(t);
+    } else {
+      setIs3DLoading(true);
+      mapInstance.dragRotate.disable();
+      mapInstance.easeTo({ pitch: 0, bearing: 0, duration: 800 });
+      const t = setTimeout(() => setIs3DLoading(false), 1000);
+      return () => clearTimeout(t);
+    }
+  }, [is3DMode, mapInstance]);
 
-    fetch('https://overpass-api.de/api/interpreter', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: 'data=' + encodeURIComponent(overpassQuery)
-    })
-    .then(res => {
-      if (!res.ok) throw new Error('Servidor remoto devolvió ' + res.status);
-      return res.json();
-    })
-    .then(data => {
-      const dynamicFeatures = data.elements
-        .filter(el => el.tags && el.tags.name)
-        .map(el => {
-          let prefix = '[POI]';
-          if (el.tags.amenity === 'restaurant') prefix = '[Restaurante]';
-          else if (el.tags.amenity === 'cafe') prefix = '[Cafe]';
-          else if (el.tags.amenity === 'bar') prefix = '[Bar]';
-          else if (el.tags.tourism === 'museum') prefix = '[Museo]';
-          else if (el.tags.tourism === 'viewpoint') prefix = '[Mirador]';
-          
-          return {
-            type: 'Feature',
-            geometry: { type: 'Point', coordinates: [el.lon, el.lat] },
-            properties: { name: `${prefix} ${el.tags.name}` }
-          };
-        });
+  const toggleMapStyle = () => {
+    const newStyle = mapStyle === STYLE_DARK ? STYLE_LIBERTY : STYLE_DARK;
+    setMapStyle(newStyle);
+    // Cambiamos el estilo pero MANTENEMOS el modo 2D/3D que el usuario tuviera
+    // o forzamos 2D si prefieres, pero el usuario pidió que no se active solo.
+  };
 
-      m.addSource('osm-dynamic-pois', {
-        type: 'geojson',
-        data: { type: 'FeatureCollection', features: dynamicFeatures }
-      });
-
-      m.addLayer({
-        id: 'osm-dynamic-poi-labels',
-        type: 'symbol',
-        source: 'osm-dynamic-pois',
-        minzoom: 16.5,
-        layout: {
-          'text-field': '{name}',
-          'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
-          'text-size': 11,
-          'text-anchor': 'bottom',
-          'text-offset': [0, -0.5]
-        },
-        paint: {
-          'text-color': '#bde0fe',
-          'text-halo-color': '#023e8a',
-          'text-halo-width': 1.2
-        }
-      });
-    })
-    .catch(err => {
-      if (err.message.includes('504')) {
-        console.warn("Overpass API está temporalmente sobrecargada (504). Los puntos dinámicos no se mostrarán.");
-      } else {
-        console.error("Error cargando POIs dinámicos de Overpass:", err);
-      }
+  const generateNextNodeId = () => {
+    if (nodes.length === 0) return 'Node1';
+    const ids = nodes.map(n => {
+      const match = n.id.match(/\d+/);
+      return match ? parseInt(match[0], 10) : 0;
     });
+    const maxId = Math.max(...ids);
+    return `Node${maxId + 1}`;
   };
 
   useEffect(() => {
@@ -393,7 +315,7 @@ function App() {
       // ── CREATE new element ──
       if (modalConfig.type === 'NODE') {
         setNodes(prev => [...prev, {
-          id: `Node${prev.length + 1}`,
+          id: generateNextNodeId(),
           lat: modalConfig.data.lat, lng: modalConfig.data.lng,
           type: formData.type || 1,
           initialContent: formData.initialContent || 0,
@@ -525,7 +447,7 @@ function App() {
         targetNodeId: algorithmSelectedNodes[1]?.id
       };
 
-      const resp = await fetch('http://localhost:8081/api/routes/generate', {
+      const resp = await fetch('/api/routes/generate', {
         method: 'POST',
         headers,
         body: JSON.stringify(payload)
@@ -689,9 +611,19 @@ function App() {
                           <span className="sol-number">Ruta {sol.solucion || idx + 1}</span>
                           {activeSolution === idx && <span className="sol-active-badge">Activa</span>}
                         </div>
-                        <div className="sol-metrics">
-                          <div className="metric"><span className="metric-label">Peso</span><span className="metric-val">{sol.totalWeight?.toFixed(1) ?? '—'}</span></div>
-                          <div className="metric"><span className="metric-label">Tiempo</span><span className="metric-val">{sol.totalTime?.toFixed(1) ?? '—'}</span></div>
+                        <div className="sol-metrics" style={{ gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+                          <div className="metric">
+                            <span className="metric-label">📏 Dist.</span>
+                            <span className="metric-val">{(sol.totalWeight || 0).toFixed(0)}m</span>
+                          </div>
+                          <div className="metric">
+                            <span className="metric-label">⏱️ Tiempo</span>
+                            <span className="metric-val">{(sol.totalTime || 0).toFixed(0)} min</span>
+                          </div>
+                          <div className="metric">
+                            <span className="metric-label">📍 Nodos</span>
+                            <span className="metric-val">{sol.features.filter(f => f.geometry.type === 'Point' || f.geometry.type === 'circle').length}</span>
+                          </div>
                         </div>
                       </button>
                     ))}
@@ -704,11 +636,61 @@ function App() {
           {activeTab === 'editor' && (
             <div className="tab-content">
               <div className="sidebar-section">
-                <h3 className="section-title">Visualización</h3>
-                <div className="toggle-group">
+                <h3 className="section-title">Motor de Mapa</h3>
+                <div className="map-engine-switcher">
+                  <button
+                    className={`engine-btn ${mapStyle === STYLE_DARK ? 'active' : ''}`}
+                    onClick={() => { setMapStyle(STYLE_DARK); setIs3DMode(false); }}
+                  >
+                    <span className="engine-label">Oscuro<br/><small>Solo 2D</small></span>
+                  </button>
+                  <button
+                    className={`engine-btn ${mapStyle === STYLE_LIBERTY ? 'active' : ''}`}
+                    onClick={() => { setMapStyle(STYLE_LIBERTY); }}
+                  >
+                    <span className="engine-label">Claro<br/><small>2D y 3D</small></span>
+                  </button>
+                </div>
+                {mapStyle === STYLE_LIBERTY && (
+                  <label className="switch-control" style={{marginTop: '14px'}}>
+                    <span>Modo 3D Activo</span>
+                    <input type="checkbox" checked={is3DMode} onChange={e => setIs3DMode(e.target.checked)} />
+                    <span className="slider"></span>
+                  </label>
+                )}
+                {mapStyle === STYLE_DARK && (
+                  <label className="switch-control" style={{marginTop: '14px'}}>
+                    <span>Etiquetas POI</span>
+                    <input
+                      type="checkbox"
+                      checked={showLabels}
+                      onChange={e => {
+                        const val = e.target.checked;
+                        if (val) setIsLabelsLoading(true);
+                        setShowLabels(val);
+                        if (val) setTimeout(() => setIsLabelsLoading(false), 1200);
+                      }}
+                    />
+                    <span className="slider"></span>
+                  </label>
+                )}
+              </div>
+
+              <details className="sidebar-section accordion">
+                <summary className="section-title accordion-title">Visualización</summary>
+                <div className="toggle-group" style={{marginTop: '12px'}}>
                   <label className="switch-control">
                     <span>Mostrar Cuadrícula</span>
-                    <input type="checkbox" checked={showGrid} onChange={e => setShowGrid(e.target.checked)} />
+                    <input
+                      type="checkbox"
+                      checked={showGrid}
+                      onChange={e => {
+                        const val = e.target.checked;
+                        if (val) setIsGridLoading(true);
+                        setShowGrid(val);
+                        if (val) setTimeout(() => setIsGridLoading(false), 150);
+                      }}
+                    />
                     <span className="slider"></span>
                   </label>
                   <label className="switch-control" style={{marginTop: '12px'}}>
@@ -716,8 +698,60 @@ function App() {
                     <input type="checkbox" checked={showDirection} onChange={e => setShowDirection(e.target.checked)} />
                     <span className="slider"></span>
                   </label>
+
+                  <div className="sub-menu-group" style={{ 
+                    marginTop: '20px', 
+                    padding: '12px', 
+                    background: 'rgba(0,0,0,0.2)', 
+                    borderRadius: '8px',
+                    border: '1px solid rgba(255,255,255,0.05)'
+                  }}>
+                    <div style={{ fontSize: '11px', textTransform: 'uppercase', color: '#94a3b8', marginBottom: '12px', fontWeight: 'bold' }}>
+                      Control de Opacidad (Modo 3D)
+                    </div>
+                    <div className="opacity-controls">
+                      <div className="field-group" style={{ marginBottom: '12px', opacity: is3DMode ? 1 : 0.5 }}>
+                        <label style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#cbd5e1' }}>
+                          <span>Edificios 3D</span>
+                          <span>{Math.round(buildingOpacity * 100)}%</span>
+                        </label>
+                        <input 
+                          type="range" min="0" max="1" step="0.05" 
+                          value={buildingOpacity} 
+                          onChange={e => setBuildingOpacity(parseFloat(e.target.value))}
+                          disabled={!is3DMode}
+                          style={{ width: '100%', height: '4px' }}
+                        />
+                      </div>
+                      <div className="field-group" style={{ marginBottom: '12px', opacity: is3DMode ? 1 : 0.5 }}>
+                        <label style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#cbd5e1' }}>
+                          <span>Grafo</span>
+                          <span>{Math.round(graphOpacity * 100)}%</span>
+                        </label>
+                        <input 
+                          type="range" min="0" max="1" step="0.05" 
+                          value={graphOpacity} 
+                          onChange={e => setGraphOpacity(parseFloat(e.target.value))}
+                          disabled={!is3DMode}
+                          style={{ width: '100%', height: '4px' }}
+                        />
+                      </div>
+                      <div className="field-group">
+                        <label style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#cbd5e1' }}>
+                          <span>Opacidad Cuadrícula</span>
+                          <span>{Math.round(gridOpacity * 100)}%</span>
+                        </label>
+                        <input 
+                          type="range" min="0" max="1" step="0.05" 
+                          value={gridOpacity} 
+                          onChange={e => setGridOpacity(parseFloat(e.target.value))}
+                          style={{ width: '100%', height: '4px' }}
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              </details>
 
               <div className="sidebar-section">
                 <h3 className="section-title">Herramientas de Grafo</h3>
@@ -735,9 +769,9 @@ function App() {
                 {modeLabel && <div className="mode-status"><div className="status-dot pulsing" /><span>{modeLabel}</span></div>}
               </div>
 
-              <div className="sidebar-section">
-                <h3 className="section-title">Algoritmos</h3>
-                <div className="algorithm-grid">
+              <details className="sidebar-section accordion">
+                <summary className="section-title accordion-title">Algoritmos</summary>
+                <div className="algorithm-grid" style={{marginTop: '12px'}}>
                   <button 
                     className={`algo-btn ${algorithmMode === 'DIJKSTRA' ? 'active' : ''}`} 
                     onClick={() => {
@@ -760,51 +794,30 @@ function App() {
                   >
                     Ford-Fulkerson
                   </button>
-                  <button 
-                    className={`algo-btn ${algorithmMode === 'RESOLVE_GRAPH' ? 'active' : ''}`} 
-                    onClick={() => {
-                        setAlgorithmMode(algorithmMode === 'RESOLVE_GRAPH' ? 'NONE' : 'RESOLVE_GRAPH');
-                        setAlgorithmSelectedNodes([]);
-                        setRouteSolutions([]);
-                        setActiveSolution(0);
-                    }}
-                    style={{ background: algorithmMode === 'RESOLVE_GRAPH' ? '#ff6b6b' : 'rgba(255, 107, 107, 0.1)' }}
-                  >
-                    Resolve Graph
-                  </button>
                 </div>
                 {algorithmMode !== 'NONE' && (
                   <div className="selection-info">
-                    {algorithmMode !== 'RESOLVE_GRAPH' ? (
-                      <>
-                        <div className="selection-step">
-                          <span className={`step-dot ${algorithmSelectedNodes.length >= 1 ? 'filled' : 'empty'}`}></span>
-                          <span>Origen: {algorithmSelectedNodes[0]?.id || '...'}</span>
-                        </div>
-                        <div className="selection-step">
-                          <span className={`step-dot ${algorithmSelectedNodes.length >= 2 ? 'filled' : 'empty'}`}></span>
-                          <span>Destino: {algorithmSelectedNodes[1]?.id || '...'}</span>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="selection-step">
-                        <span className="step-dot filled"></span>
-                        <span>Se enviará todo el grafo actual.</span>
-                      </div>
-                    )}
+                    <div className="selection-step">
+                      <span className={`step-dot ${algorithmSelectedNodes.length >= 1 ? 'filled' : 'empty'}`}></span>
+                      <span>Origen: {algorithmSelectedNodes[0]?.id || '...'}</span>
+                    </div>
+                    <div className="selection-step">
+                      <span className={`step-dot ${algorithmSelectedNodes.length >= 2 ? 'filled' : 'empty'}`}></span>
+                      <span>Destino: {algorithmSelectedNodes[1]?.id || '...'}</span>
+                    </div>
                     
-                    {(algorithmSelectedNodes.length === 2 || algorithmMode === 'RESOLVE_GRAPH') && (
+                    {algorithmSelectedNodes.length === 2 && (
                         <button className="cta-btn primary" style={{marginTop: '1rem'}} onClick={generateRoutes}>
-                            Calcular {algorithmMode === 'DIJKSTRA' ? 'Dijkstra' : algorithmMode === 'FORD_FULKERSON' ? 'Max Flow' : 'Solución Global'}
+                            Calcular {algorithmMode === 'DIJKSTRA' ? 'Dijkstra' : 'Max Flow'}
                         </button>
                     )}
                   </div>
                 )}
-              </div>
+              </details>
 
-              <div className="sidebar-section">
-                <h3 className="section-title">Datos del Grafo</h3>
-                <div className="graph-stats-grid">
+              <details className="sidebar-section accordion">
+                <summary className="section-title accordion-title">Datos del Grafo</summary>
+                <div className="graph-stats-grid" style={{marginTop: '12px'}}>
                   <div className="graph-stat"><span className="graph-stat-num">{nodes.length}</span><span className="graph-stat-label">Nodos</span></div>
                   <div className="graph-stat"><span className="graph-stat-num">{edges.length}</span><span className="graph-stat-label">Aristas</span></div>
                 </div>
@@ -819,7 +832,7 @@ function App() {
                     setRouteSolutions([]); setActiveSolution(0); 
                   }}><IconTrash /> Limpiar todo</button>
                 </div>
-              </div>
+              </details>
             </div>
           )}
         </aside>
@@ -828,6 +841,30 @@ function App() {
 
         <div className="map-canvas">
           <div ref={mapContainer} style={{ height: '100%', width: '100%' }} />
+
+          {/* 3D Mode loading overlay */}
+          {is3DLoading && (
+            <div className="map-mode-overlay">
+              <div className="map-mode-spinner"></div>
+              <span>Cargando…</span>
+            </div>
+          )}
+
+          {/* Grid loading overlay */}
+          {isGridLoading && (
+            <div className="map-mode-overlay">
+              <div className="map-mode-spinner"></div>
+              <span>Generando cuadrícula…</span>
+            </div>
+          )}
+
+          {/* Labels loading overlay */}
+          {isLabelsLoading && (
+            <div className="map-mode-overlay">
+              <div className="map-mode-spinner"></div>
+              <span>Cargando etiquetas POI…</span>
+            </div>
+          )}
           
           {mapInstance && (
              <MapGraphEditor
@@ -844,7 +881,19 @@ function App() {
                showGrid={showGrid}
                showDirection={showDirection}
                algorithmSelectedNodes={algorithmSelectedNodes}
+               is3DMode={is3DMode}
+               buildingOpacity={buildingOpacity}
+               graphOpacity={graphOpacity}
+               gridOpacity={gridOpacity}
+               mapStyle={mapStyle}
              />
+          )}
+
+          {mapInstance && (
+            <MapLabels
+              map={mapInstance}
+              isVisible={mapStyle === STYLE_DARK && showLabels}
+            />
           )}
         </div>
       </div>

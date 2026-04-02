@@ -161,7 +161,7 @@ export function PreferencesPage() {
     const fetchMe = async () => {
       if (!token) return;
       try {
-        const resp = await fetch('http://localhost:8081/api/users/me', {
+        const resp = await fetch('/api/users/me', {
           headers: { Authorization: `Bearer ${token}` }
         });
         if (resp.ok) {

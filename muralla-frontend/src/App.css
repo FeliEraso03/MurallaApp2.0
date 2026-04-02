@@ -303,6 +303,33 @@ input, select { font-family: inherit; }
   line-height: 1.5;
 }
 
+/* ── UI Accordions ─────────────────────────────────*/
+.sidebar-section.accordion {
+  padding: 16px 20px;
+}
+.accordion-title {
+  cursor: pointer;
+  margin-bottom: 0px; 
+  user-select: none;
+  transition: color 0.2s;
+  justify-content: space-between;
+}
+.accordion-title:hover {
+  color: rgba(255,255,255,0.7);
+}
+.accordion-title::after {
+  content: "▼";
+  font-size: 0.65rem;
+  transition: transform 0.2s;
+  color: rgba(255,255,255,0.2);
+}
+.sidebar-section.accordion[open] .accordion-title::after {
+  transform: rotate(180deg);
+}
+.sidebar-section.accordion[open] .accordion-title {
+  color: var(--orange);
+}
+
 /* ── Planner Fields ────────────────────────────────*/
 .field-group {
   margin-bottom: 14px;
@@ -779,3 +806,86 @@ input, select { font-family: inherit; }
 }
 .selection-step:nth-child(1) .step-dot.filled { background: #4cc9f0; box-shadow: 0 0 8px rgba(76, 201, 240, 0.4); }
 .selection-step:nth-child(2) .step-dot.filled { background: #f72585; box-shadow: 0 0 8px rgba(247, 37, 133, 0.4); }
+
+/* ── Map Engine Switcher ──────────────────────────────*/
+.map-engine-switcher {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 4px;
+}
+.engine-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 10px;
+  background: rgba(0,0,0,0.25);
+  border: 1.5px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  color: rgba(255,255,255,0.65);
+  font-size: 0.78rem;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.22s;
+}
+.engine-btn:hover {
+  border-color: rgba(247,127,0,0.5);
+  color: white;
+  background: rgba(247,127,0,0.07);
+}
+.engine-btn.active {
+  border-color: var(--orange);
+  background: rgba(247,127,0,0.15);
+  color: var(--orange);
+  box-shadow: 0 0 0 1px var(--orange), 0 4px 14px var(--orange-glow);
+}
+.engine-icon { font-size: 1.5rem; line-height: 1; }
+.engine-label { line-height: 1.4; }
+.engine-label small {
+  display: block;
+  font-size: 0.68rem;
+  opacity: 0.65;
+  font-weight: 400;
+}
+
+/* ══════════════════════════════════════════════════
+   MAP MODE LOADING OVERLAY
+   ══════════════════════════════════════════════════ */
+.map-mode-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 400;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  background: rgba(13, 27, 42, 0.72);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: overlay-appear 0.18s ease;
+  pointer-events: none;
+}
+@keyframes overlay-appear {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.map-mode-overlay span {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.85);
+  letter-spacing: 0.3px;
+}
+.map-mode-spinner {
+  width: 44px;
+  height: 44px;
+  border: 3px solid rgba(255,255,255,0.12);
+  border-top-color: var(--orange);
+  border-radius: 50%;
+  animation: spin-loader 0.8s linear infinite;
+}
+@keyframes spin-loader {
+  to { transform: rotate(360deg); }
+}

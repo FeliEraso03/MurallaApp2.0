@@ -59,9 +59,9 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             <ProtectedRoute><PreferencesPage /></ProtectedRoute>
           } />
 
-          {/* Protected: main editor */}
+          {/* Public: main editor (temporarily) */}
           <Route path="/editor" element={
-            <ProtectedRoute><App /></ProtectedRoute>
+            <App />
           } />
 
           {/* Protected: User Profile */}
