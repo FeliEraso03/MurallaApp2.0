@@ -85,6 +85,7 @@ export function AuthProvider({ children }) {
     }
 
     localStorage.setItem('muralla_prefs_done', '1');
+
     return data;
   };
 
