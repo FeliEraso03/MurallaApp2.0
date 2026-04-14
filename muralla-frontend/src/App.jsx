@@ -6,6 +6,7 @@ import { MapLabels } from './components/MapLabels';
 import { ElementModal } from './components/ElementModal';
 import { parseResolveGraphOutput } from './utils/Wdg2PnsParser';
 import { useAuth } from './utils/authContext';
+import { useI18n } from './contexts/I18nContext';
 import { Link } from 'react-router-dom';
 import './App.css';
 
@@ -82,9 +83,10 @@ function App() {
   const [mapInstance, setMapInstance] = useState(null);
   const [isSidebarOpen, setSidebarOpen] = useState(window.innerWidth > 768);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  const [activeTab, setActiveTab] = useState('planner'); 
+  const [activeTab, setActiveTab] = useState('planner');
   
   const { user } = useAuth();
+  const { t } = useI18n();
 
   const [nodes, setNodes] = useState([]);
   const [edges, setEdges] = useState([]);
@@ -398,8 +400,8 @@ function App() {
   };
 
   const generateRoutes = async () => {
-    if (nodes.length < 2) { alert('Se necesitan al menos 2 nodos en el grafo.'); return; }
-    if (algorithmMode !== 'NONE' && algorithmMode !== 'RESOLVE_GRAPH' && algorithmSelectedNodes.length < 2) { alert('Seleccione nodo origen y destino en el mapa.'); return; }
+    if (nodes.length < 2) { alert(t('app.error_min_nodes')); return; }
+    if (algorithmMode !== 'NONE' && algorithmMode !== 'RESOLVE_GRAPH' && algorithmSelectedNodes.length < 2) { alert(t('app.select_origin_destination')); return; }
 
     const headers = { 'Content-Type': 'application/json' };
 
@@ -522,12 +524,12 @@ function App() {
         });
       });
       setNodes(newNodes); setEdges(newEdges); setGraphMode('IDLE');
-    } catch (e) { alert('Error cargando el grafo predeterminado.'); }
+    } catch (e) { alert(t('app.error_loading_graph')); }
   };
 
-  const modeLabel = graphMode === 'ADD_NODE' ? 'Click en el mapa para añadir un nodo'
+  const modeLabel = graphMode === 'ADD_NODE' ? t('app.click_add_node')
     : graphMode === 'ADD_EDGE'
-      ? selectedNodeA ? `Origen: ${selectedNodeA.id} — selecciona el destino` : 'Selecciona el nodo origen'
+      ? selectedNodeA ? t('app.origin_selected', { id: selectedNodeA.id }) : t('app.select_origin')
       : null;
 
   return (
@@ -542,14 +544,14 @@ function App() {
         </div>
         <div className="topbar-search">
           <IconSearch />
-          <input type="text" placeholder="Buscar lugar en Cartagena..." />
+          <input type="text" placeholder={t('app.search_placeholder')} />
         </div>
         <div className="topbar-stats" style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-          <span className="stat-chip">{nodes.length} <small>nodos</small></span>
-          <span className="stat-chip">{edges.length} <small>aristas</small></span>
+          <span className="stat-chip">{nodes.length} <small>{t('app.nodes')}</small></span>
+          <span className="stat-chip">{edges.length} <small>{t('app.edges')}</small></span>
           
           {user && (
-            <Link to="/profile" title="Mi perfil de viajero" style={{
+            <Link to="/profile" title={t('app.my_traveler_profile')} style={{
               width: '36px', height: '36px', borderRadius: '50%',
               background: 'linear-gradient(135deg, var(--orange), #e55d02)',
               color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -571,57 +573,57 @@ function App() {
         <aside className={`sidebar ${isSidebarOpen ? 'open' : 'closed'}`}>
           <div className="sidebar-tabs">
             <button className={`tab-btn ${activeTab === 'planner' ? 'active' : ''}`} onClick={() => setActiveTab('planner')}>
-              <IconMap /> Planificar
+              <IconMap /> {t('app.plan')}
             </button>
             <button className={`tab-btn ${activeTab === 'editor' ? 'active' : ''}`} onClick={() => setActiveTab('editor')}>
-              <IconEdit /> Editor
+              <IconEdit /> {t('app.editor')}
             </button>
           </div>
 
           {activeTab === 'planner' && (
             <div className="tab-content">
               <div className="sidebar-section">
-                <h3 className="section-title">Parámetros de Ruta</h3>
+                <h3 className="section-title">{t('app.route_params')}</h3>
                 <div className="field-group">
-                  <label>Tiempo disponible (horas)</label>
+                  <label>{t('app.time_available_hours')}</label>
                   <input type="number" defaultValue={4} min={1} max={12} />
                 </div>
                 <div className="field-group">
-                  <label>Preferencia de experiencia</label>
+                  <label>{t('app.experience_preference')}</label>
                   <select>
-                    <option>Histórico Colonial</option>
-                    <option>Gastronómico Marítimo</option>
-                    <option>Religioso Cultural</option>
-                    <option>Turismo Playero</option>
+                    <option>{t('app.historic_colonial')}</option>
+                    <option>{t('app.gastronomic_maritime')}</option>
+                    <option>{t('app.religious_cultural')}</option>
+                    <option>{t('app.beach_tourism')}</option>
                   </select>
                 </div>
                 <button className="cta-btn" onClick={generateRoutes} disabled={isGenerating}>
                   <IconRoute />
-                  {isGenerating ? 'Calculando rutas...' : 'Generar Rutas P-graph'}
+                  {isGenerating ? t('app.calculating_routes') : t('app.generate_routes')}
                 </button>
               </div>
 
               {routeSolutions.length > 0 && (
                 <div className="sidebar-section">
-                  <h3 className="section-title">Rutas Encontradas <span className="badge">{routeSolutions.length}</span></h3>
+                  <h3 className="section-title">{t('app.routes_found')} <span className="badge">{routeSolutions.length}</span></h3>
                   <div className="solutions-list">
                     {routeSolutions.map((sol, idx) => (
                       <button key={idx} className={`solution-card ${activeSolution === idx ? 'active' : ''}`} onClick={() => setActiveSolution(idx)}>
                         <div className="sol-header">
-                          <span className="sol-number">Ruta {sol.solucion || idx + 1}</span>
-                          {activeSolution === idx && <span className="sol-active-badge">Activa</span>}
+                          <span className="sol-number">{t('app.route')} {sol.solucion || idx + 1}</span>
+                          {activeSolution === idx && <span className="sol-active-badge">{t('app.active')}</span>}
                         </div>
                         <div className="sol-metrics" style={{ gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
                           <div className="metric">
-                            <span className="metric-label">📏 Dist.</span>
+                            <span className="metric-label">{t('app.dist')}</span>
                             <span className="metric-val">{(sol.totalWeight || 0).toFixed(0)}m</span>
                           </div>
                           <div className="metric">
-                            <span className="metric-label">⏱️ Tiempo</span>
+                            <span className="metric-label">{t('app.time')}</span>
                             <span className="metric-val">{(sol.totalTime || 0).toFixed(0)} min</span>
                           </div>
                           <div className="metric">
-                            <span className="metric-label">📍 Nodos</span>
+                            <span className="metric-label">{t('app.nodes_label')}</span>
                             <span className="metric-val">{sol.features.filter(f => f.geometry.type === 'Point' || f.geometry.type === 'circle').length}</span>
                           </div>
                         </div>
@@ -636,31 +638,31 @@ function App() {
           {activeTab === 'editor' && (
             <div className="tab-content">
               <div className="sidebar-section">
-                <h3 className="section-title">Motor de Mapa</h3>
+                <h3 className="section-title">{t('app.map_engine')}</h3>
                 <div className="map-engine-switcher">
                   <button
                     className={`engine-btn ${mapStyle === STYLE_DARK ? 'active' : ''}`}
                     onClick={() => { setMapStyle(STYLE_DARK); setIs3DMode(false); }}
                   >
-                    <span className="engine-label">Oscuro<br/><small>Solo 2D</small></span>
+                    <span className="engine-label">{t('app.dark_mode')}<br/><small>{t('app.dark_mode_desc')}</small></span>
                   </button>
                   <button
                     className={`engine-btn ${mapStyle === STYLE_LIBERTY ? 'active' : ''}`}
                     onClick={() => { setMapStyle(STYLE_LIBERTY); }}
                   >
-                    <span className="engine-label">Claro<br/><small>2D y 3D</small></span>
+                    <span className="engine-label">{t('app.light_mode')}<br/><small>{t('app.light_mode_desc')}</small></span>
                   </button>
                 </div>
                 {mapStyle === STYLE_LIBERTY && (
                   <label className="switch-control" style={{marginTop: '14px'}}>
-                    <span>Modo 3D Activo</span>
+                    <span>{t('app.mode_3d_active')}</span>
                     <input type="checkbox" checked={is3DMode} onChange={e => setIs3DMode(e.target.checked)} />
                     <span className="slider"></span>
                   </label>
                 )}
                 {mapStyle === STYLE_DARK && (
                   <label className="switch-control" style={{marginTop: '14px'}}>
-                    <span>Etiquetas POI</span>
+                    <span>{t('app.show_labels')}</span>
                     <input
                       type="checkbox"
                       checked={showLabels}
@@ -677,10 +679,10 @@ function App() {
               </div>
 
               <details className="sidebar-section accordion">
-                <summary className="section-title accordion-title">Visualización</summary>
+                <summary className="section-title accordion-title">{t('app.visualization')}</summary>
                 <div className="toggle-group" style={{marginTop: '12px'}}>
                   <label className="switch-control">
-                    <span>Mostrar Cuadrícula</span>
+                    <span>{t('app.activate_grid')}</span>
                     <input
                       type="checkbox"
                       checked={showGrid}
@@ -694,7 +696,7 @@ function App() {
                     <span className="slider"></span>
                   </label>
                   <label className="switch-control" style={{marginTop: '12px'}}>
-                    <span>Visualizar Sentido</span>
+                    <span>{t('app.visualize_direction')}</span>
                     <input type="checkbox" checked={showDirection} onChange={e => setShowDirection(e.target.checked)} />
                     <span className="slider"></span>
                   </label>
@@ -707,12 +709,12 @@ function App() {
                     border: '1px solid rgba(255,255,255,0.05)'
                   }}>
                     <div style={{ fontSize: '11px', textTransform: 'uppercase', color: '#94a3b8', marginBottom: '12px', fontWeight: 'bold' }}>
-                      Control de Opacidad (Modo 3D)
+                      {t('app.opacity_control_3d')}
                     </div>
                     <div className="opacity-controls">
                       <div className="field-group" style={{ marginBottom: '12px', opacity: is3DMode ? 1 : 0.5 }}>
                         <label style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#cbd5e1' }}>
-                          <span>Edificios 3D</span>
+                          <span>{t('app.buildings_3d')}</span>
                           <span>{Math.round(buildingOpacity * 100)}%</span>
                         </label>
                         <input 
@@ -725,7 +727,7 @@ function App() {
                       </div>
                       <div className="field-group" style={{ marginBottom: '12px', opacity: is3DMode ? 1 : 0.5 }}>
                         <label style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#cbd5e1' }}>
-                          <span>Grafo</span>
+                          <span>{t('app.graph')}</span>
                           <span>{Math.round(graphOpacity * 100)}%</span>
                         </label>
                         <input 
@@ -738,7 +740,7 @@ function App() {
                       </div>
                       <div className="field-group">
                         <label style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#cbd5e1' }}>
-                          <span>Opacidad Cuadrícula</span>
+                          <span>{t('app.grid_opacity')}</span>
                           <span>{Math.round(gridOpacity * 100)}%</span>
                         </label>
                         <input 
@@ -754,23 +756,23 @@ function App() {
               </details>
 
               <div className="sidebar-section">
-                <h3 className="section-title">Herramientas de Grafo</h3>
-                <p className="section-hint">Selecciona una herramienta y haz clic en el mapa</p>
+                <h3 className="section-title">{t('app.graph_tools')}</h3>
+                <p className="section-hint">{t('app.select_tool_hint')}</p>
                 <div className="tool-grid">
                   <button className={`tool-card ${graphMode === 'ADD_NODE' ? 'active' : ''}`} onClick={() => setGraphMode(graphMode === 'ADD_NODE' ? 'IDLE' : 'ADD_NODE')}>
                     <span className="tool-icon node-icon"><IconNode /></span>
-                    <span className="tool-label">Añadir<br/>Nodo</span>
+                    <span className="tool-label">{t('app.add_node')}</span>
                   </button>
                   <button className={`tool-card ${graphMode === 'ADD_EDGE' ? 'active' : ''}`} onClick={() => { setGraphMode(graphMode === 'ADD_EDGE' ? 'IDLE' : 'ADD_EDGE'); setSelectedNodeA(null); }}>
                     <span className="tool-icon edge-icon"><IconEdge /></span>
-                    <span className="tool-label">Conectar<br/>Nodos</span>
+                    <span className="tool-label">{t('app.connect_nodes')}</span>
                   </button>
                 </div>
                 {modeLabel && <div className="mode-status"><div className="status-dot pulsing" /><span>{modeLabel}</span></div>}
               </div>
 
               <details className="sidebar-section accordion">
-                <summary className="section-title accordion-title">Algoritmos</summary>
+                <summary className="section-title accordion-title">{t('app.algorithms')}</summary>
                 <div className="algorithm-grid" style={{marginTop: '12px'}}>
                   <button 
                     className={`algo-btn ${algorithmMode === 'DIJKSTRA' ? 'active' : ''}`} 
@@ -781,7 +783,7 @@ function App() {
                         setActiveSolution(0);
                     }}
                   >
-                    Dijkstra
+                    {t('app.dijkstra')}
                   </button>
                   <button 
                     className={`algo-btn ${algorithmMode === 'FORD_FULKERSON' ? 'active' : ''}`} 
@@ -792,23 +794,23 @@ function App() {
                         setActiveSolution(0);
                     }}
                   >
-                    Ford-Fulkerson
+                    {t('app.ford_fulkerson')}
                   </button>
                 </div>
                 {algorithmMode !== 'NONE' && (
                   <div className="selection-info">
                     <div className="selection-step">
                       <span className={`step-dot ${algorithmSelectedNodes.length >= 1 ? 'filled' : 'empty'}`}></span>
-                      <span>Origen: {algorithmSelectedNodes[0]?.id || '...'}</span>
+                      <span>{t('app.origin', { id: algorithmSelectedNodes[0]?.id || '...' })}</span>
                     </div>
                     <div className="selection-step">
                       <span className={`step-dot ${algorithmSelectedNodes.length >= 2 ? 'filled' : 'empty'}`}></span>
-                      <span>Destino: {algorithmSelectedNodes[1]?.id || '...'}</span>
+                      <span>{t('app.destination', { id: algorithmSelectedNodes[1]?.id || '...' })}</span>
                     </div>
                     
                     {algorithmSelectedNodes.length === 2 && (
                         <button className="cta-btn primary" style={{marginTop: '1rem'}} onClick={generateRoutes}>
-                            Calcular {algorithmMode === 'DIJKSTRA' ? 'Dijkstra' : 'Max Flow'}
+                            {t('app.calculate', { algorithm: algorithmMode === 'DIJKSTRA' ? 'Dijkstra' : 'Max Flow' })}
                         </button>
                     )}
                   </div>
@@ -816,21 +818,21 @@ function App() {
               </details>
 
               <details className="sidebar-section accordion">
-                <summary className="section-title accordion-title">Datos del Grafo</summary>
+                <summary className="section-title accordion-title">{t('app.graph_data')}</summary>
                 <div className="graph-stats-grid" style={{marginTop: '12px'}}>
-                  <div className="graph-stat"><span className="graph-stat-num">{nodes.length}</span><span className="graph-stat-label">Nodos</span></div>
-                  <div className="graph-stat"><span className="graph-stat-num">{edges.length}</span><span className="graph-stat-label">Aristas</span></div>
+                  <div className="graph-stat"><span className="graph-stat-num">{nodes.length}</span><span className="graph-stat-label">{t('app.nodes_label')}</span></div>
+                  <div className="graph-stat"><span className="graph-stat-num">{edges.length}</span><span className="graph-stat-label">{t('app.edges')}</span></div>
                 </div>
                 <div className="action-list">
                   <input type="file" accept=".json,.geojson" ref={fileInputRef} style={{display:'none'}} onChange={handleFileUpload} />
-                  <button className="action-btn" onClick={loadDefaultGraph} style={{ background: 'rgba(0, 255, 136, 0.1)', color: '#00ff88' }}><IconMap /> Cargar Cartagena (Full)</button>
-                  <button className="action-btn" onClick={() => fileInputRef.current?.click()}><IconUpload /> Importar Grafo Local</button>
-                  <button className="action-btn" onClick={handleExportGeoJSON} style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', color: '#fff' }}>Exportar GEOJSON</button>
+                  <button className="action-btn" onClick={loadDefaultGraph} style={{ background: 'rgba(0, 255, 136, 0.1)', color: '#00ff88' }}><IconMap /> {t('app.load_cartagena')}</button>
+                  <button className="action-btn" onClick={() => fileInputRef.current?.click()}><IconUpload /> {t('app.import_local_graph')}</button>
+                  <button className="action-btn" onClick={handleExportGeoJSON} style={{ backgroundColor: 'rgba(255, 255, 255, 0.05)', color: '#fff' }}>{t('app.export_geojson')}</button>
                   <button className="action-btn danger" onClick={() => { 
                     setNodes([]); setEdges([]); setSelectedNodeA(null); 
                     setGraphMode('IDLE'); setAlgorithmSelectedNodes([]);
                     setRouteSolutions([]); setActiveSolution(0); 
-                  }}><IconTrash /> Limpiar todo</button>
+                  }}><IconTrash /> {t('app.clear_all')}</button>
                 </div>
               </details>
             </div>
@@ -846,7 +848,7 @@ function App() {
           {is3DLoading && (
             <div className="map-mode-overlay">
               <div className="map-mode-spinner"></div>
-              <span>Cargando…</span>
+              <span>{t('app.loading')}</span>
             </div>
           )}
 
@@ -854,7 +856,7 @@ function App() {
           {isGridLoading && (
             <div className="map-mode-overlay">
               <div className="map-mode-spinner"></div>
-              <span>Generando cuadrícula…</span>
+              <span>{t('app.generating_grid')}</span>
             </div>
           )}
 
@@ -862,7 +864,7 @@ function App() {
           {isLabelsLoading && (
             <div className="map-mode-overlay">
               <div className="map-mode-spinner"></div>
-              <span>Cargando etiquetas POI…</span>
+              <span>{t('app.loading_poi_labels')}</span>
             </div>
           )}
           

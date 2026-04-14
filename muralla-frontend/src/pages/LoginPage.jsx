@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../utils/authContext';
+import { useI18n } from '../contexts/I18nContext';
 import '../auth.css';
 
 // ── SVG Icons ────────────────────────────────────────
@@ -36,11 +37,18 @@ const IconEyeOff = () => (
 export function LoginPage() {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const { t, language, changeLanguage, loading: i18nLoading } = useI18n();
 
   const [form, setForm] = useState({ email: '', password: '' });
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (i18nLoading === false) {
+      // Language loaded
+    }
+  }, [i18nLoading]);
 
   const handleChange = (e) => {
     setForm(f => ({ ...f, [e.target.name]: e.target.value }));
@@ -49,13 +57,13 @@ export function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.email || !form.password) { setError('Completa todos los campos.'); return; }
+    if (!form.email || !form.password) { setError(t('login.error_fields')); return; }
     setLoading(true);
     try {
       await login(form.email, form.password);
       navigate('/editor');
     } catch (err) {
-      setError(err.message || 'Error al iniciar sesión.');
+      setError(err.message || t('login.error_login'));
     } finally {
       setLoading(false);
     }
@@ -65,6 +73,10 @@ export function LoginPage() {
     // Google OAuth redirect — backend Spring Security OAuth2 endpoint
     window.location.href = 'http://localhost:8081/oauth2/authorization/google';
   };
+
+  if (i18nLoading) {
+    return null;
+  }
 
   return (
     <div className="auth-shell">
@@ -77,18 +89,18 @@ export function LoginPage() {
             <span className="auth-brand-tag">2.0</span>
           </div>
           <h1 className="auth-tagline">
-            Descubre Cartagena<br />
-            <span>a tu manera</span>
+            {t('login.tagline')}<br />
+            <span>{t('login.tagline_subtitle')}</span>
           </h1>
           <p className="auth-description">
-            Planifica rutas turísticas personalizadas por el Centro Histórico usando el motor de grafos P-graph. Cada recorrido, único.
+            {t('login.description')}
           </p>
           <div className="auth-features">
             {[
-              'Rutas optimizadas con algoritmos P-graph',
-              'Personalización por intereses culturales',
-              'Más de 40 puntos de interés mapeados',
-              'Editor de grafos interactivo',
+              t('login.feature_1'),
+              t('login.feature_2'),
+              t('login.feature_3'),
+              t('login.feature_4'),
             ].map(f => (
               <div className="auth-feature-item" key={f}>
                 <span className="auth-feature-dot" />
@@ -108,8 +120,8 @@ export function LoginPage() {
             <span className="auth-brand-tag">2.0</span>
           </div>
 
-          <h2 className="auth-form-title">Bienvenido</h2>
-          <p className="auth-form-subtitle">Inicia sesión para acceder a tu planificador de rutas</p>
+          <h2 className="auth-form-title">{t('login.title')}</h2>
+          <p className="auth-form-subtitle">{t('login.subtitle')}</p>
 
           {error && (
             <div className="auth-alert error">
@@ -123,19 +135,19 @@ export function LoginPage() {
           {/* Google */}
           <button type="button" className="auth-google-btn" onClick={handleGoogle} id="login-google-btn">
             <IconGoogle />
-            Continuar con Google
+            {t('login.google_btn')}
           </button>
 
           <div className="auth-divider">
             <span className="auth-divider-line" />
-            <span className="auth-divider-text">o con correo</span>
+            <span className="auth-divider-text">{t('login.divider')}</span>
             <span className="auth-divider-line" />
           </div>
 
           {/* Form */}
           <form onSubmit={handleSubmit} noValidate>
             <div className="auth-field">
-              <label className="auth-label" htmlFor="login-email">Correo electrónico</label>
+              <label className="auth-label" htmlFor="login-email">{t('login.email_label')}</label>
               <div className="auth-input-wrap">
                 <span className="auth-input-icon"><IconMail /></span>
                 <input
@@ -143,7 +155,7 @@ export function LoginPage() {
                   type="email"
                   name="email"
                   className="auth-input"
-                  placeholder="tucorreo@ejemplo.com"
+                  placeholder={t('login.email_placeholder')}
                   value={form.email}
                   onChange={handleChange}
                   autoComplete="email"
@@ -152,7 +164,7 @@ export function LoginPage() {
             </div>
 
             <div className="auth-field">
-              <label className="auth-label" htmlFor="login-password">Contraseña</label>
+              <label className="auth-label" htmlFor="login-password">{t('login.password_label')}</label>
               <div className="auth-input-wrap">
                 <span className="auth-input-icon"><IconLock /></span>
                 <input
@@ -160,7 +172,7 @@ export function LoginPage() {
                   type={showPass ? 'text' : 'password'}
                   name="password"
                   className="auth-input"
-                  placeholder="••••••••"
+                  placeholder={t('login.password_placeholder')}
                   value={form.password}
                   onChange={handleChange}
                   autoComplete="current-password"
@@ -174,7 +186,7 @@ export function LoginPage() {
                     background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer',
                     display: 'flex', alignItems: 'center',
                   }}
-                  aria-label={showPass ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                  aria-label={showPass ? t('login.hide_password') : t('login.show_password')}
                 >
                   {showPass ? <IconEyeOff /> : <IconEye />}
                 </button>
@@ -187,14 +199,14 @@ export function LoginPage() {
               className="auth-submit-btn"
               disabled={loading}
             >
-              {loading ? <><span className="auth-spinner" /> Verificando...</> : 'Iniciar sesión'}
+              {loading ? <><span className="auth-spinner" /> {t('login.verifying')}</> : t('login.submit')}
             </button>
           </form>
 
           <div className="auth-switch">
-            ¿No tienes cuenta?{' '}
+            {t('login.no_account')}{' '}
             <button type="button" onClick={() => navigate('/register')}>
-              Regístrate gratis
+              {t('login.register_link')}
             </button>
           </div>
         </div>

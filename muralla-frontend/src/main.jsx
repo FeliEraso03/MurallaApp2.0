@@ -11,6 +11,7 @@ import { PreferencesPage } from './pages/PreferencesPage.jsx';
 import { UserProfilePage } from './pages/UserProfilePage.jsx';
 import { OAuth2CallbackPage } from './pages/OAuth2CallbackPage.jsx';
 import { AuthProvider, useAuth } from './utils/authContext.jsx';
+import { I18nProvider } from './contexts/I18nContext.jsx';
 import './App.css';
 import './pages.css';
 
@@ -40,39 +41,41 @@ function GuestRoute({ children }) {
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          {/* Public pages */}
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/about" element={<AboutUs />} />
-          <Route path="/instructions" element={<Instructions />} />
+      <I18nProvider>
+        <BrowserRouter>
+          <Routes>
+            {/* Public pages */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/about" element={<AboutUs />} />
+            <Route path="/instructions" element={<Instructions />} />
 
-          {/* Guest-only auth pages */}
-          <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
-          <Route path="/register" element={<GuestRoute><RegisterPage /></GuestRoute>} />
+            {/* Guest-only auth pages */}
+            <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
+            <Route path="/register" element={<GuestRoute><RegisterPage /></GuestRoute>} />
 
-          {/* OAuth2 callback — always public, handles Google redirect */}
-          <Route path="/oauth2-callback" element={<OAuth2CallbackPage />} />
+            {/* OAuth2 callback — always public, handles Google redirect */}
+            <Route path="/oauth2-callback" element={<OAuth2CallbackPage />} />
 
-          {/* Protected: preferences wizard (right after register) */}
-          <Route path="/preferences" element={
-            <ProtectedRoute><PreferencesPage /></ProtectedRoute>
-          } />
+            {/* Protected: preferences wizard (right after register) */}
+            <Route path="/preferences" element={
+              <ProtectedRoute><PreferencesPage /></ProtectedRoute>
+            } />
 
-          {/* Public: main editor (temporarily) */}
-          <Route path="/editor" element={
-            <App />
-          } />
+            {/* Public: main editor (temporarily) */}
+            <Route path="/editor" element={
+              <App />
+            } />
 
-          {/* Protected: User Profile */}
-          <Route path="/profile" element={
-            <ProtectedRoute><UserProfilePage /></ProtectedRoute>
-          } />
+            {/* Protected: User Profile */}
+            <Route path="/profile" element={
+              <ProtectedRoute><UserProfilePage /></ProtectedRoute>
+            } />
 
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
+            {/* Fallback */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </I18nProvider>
     </AuthProvider>
   </React.StrictMode>,
 );

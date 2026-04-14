@@ -1,97 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../utils/authContext';
-import { Landmark, Church, Utensils, TreePine, Palette, Map, User, HeartHandshake, Users, Footprints, Car, Clock } from 'lucide-react';
+import { useI18n } from '../contexts/I18nContext';
+import { Landmark, Church, Utensils, TreePine, Palette, Map, User, HeartHandshake, Users, Footprints, Car, Clock, Globe } from 'lucide-react';
 import '../auth.css';
-
-// ── Interest categories definition ───────────────────
-const INTERESTS = [
-  {
-    key: 'interestCulture',
-    icon: <Landmark size={20} />,
-    label: 'Cultural e Histórico',
-    desc: 'Murallas, museos, plazas históricas y patrimonio colonial',
-  },
-  {
-    key: 'interestReligion',
-    icon: <Church size={20} />,
-    label: 'Religioso y Espiritual',
-    desc: 'Iglesias, conventos y sitios de devoción histórica',
-  },
-  {
-    key: 'interestGastronomy',
-    icon: <Utensils size={20} />,
-    label: 'Gastronómico',
-    desc: 'Restaurantes locales, mercados y gastronomía caribeña',
-  },
-  {
-    key: 'interestNature',
-    icon: <TreePine size={20} />,
-    label: 'Naturaleza y Espacios Abiertos',
-    desc: 'Plazas, parques, miradores y espacios al aire libre',
-  },
-  {
-    key: 'interestArts',
-    icon: <Palette size={20} />,
-    label: 'Arte Vivo y Artesanías',
-    desc: 'Arte mural, artesanías, galerías y cultura bohemia en Getsemaní',
-  },
-  {
-    key: 'interestAdventure',
-    icon: <Map size={20} />,
-    label: 'Exploración y Aventura',
-    desc: 'Callejones, barrios emergentes y rutas poco convencionales',
-  },
-];
-
-const TIME_OPTIONS = [
-  { value: 1, label: '1h', desc: 'Rápido' },
-  { value: 2, label: '2h', desc: 'Express' },
-  { value: 4, label: '4h', desc: 'Estándar' },
-  { value: 6, label: '6h', desc: 'Extendido' },
-  { value: 8, label: '8h', desc: 'Completo' },
-  { value: 10, label: '10h+', desc: 'Día entero' },
-];
-
-const GROUP_OPTIONS = [
-  { value: 'SOLO',   icon: <User size={18} />, label: 'Solo' },
-  { value: 'COUPLE', icon: <HeartHandshake size={18} />, label: 'Pareja' },
-  { value: 'FAMILY', icon: <Users size={18} />, label: 'Familia' },
-  { value: 'GROUP',  icon: <Users size={18} />, label: 'Grupo' },
-];
-
-const MOBILITY_OPTIONS = [
-  { value: 'WALK',  icon: <Footprints size={18} />, label: 'A pie', desc: 'Recorrido peatonal completo' },
-  { value: 'MULTI', icon: <Car size={18} />, label: 'Combinado', desc: 'Coche de caballos, tuk-tuk + caminata' },
-];
-
-const CURRENCY_OPTIONS = [
-  { value: 'USD', label: 'Dólar estadounidense (USD)', symbol: '$' },
-  { value: 'EUR', label: 'Euro (EUR)', symbol: '€' },
-  { value: 'GBP', label: 'Libra esterlina (GBP)', symbol: '£' },
-  { value: 'JPY', label: 'Yen japonés (JPY)', symbol: '¥' },
-  { value: 'CNY', label: 'Yuan chino (CNY)', symbol: '¥' },
-  { value: 'COP', label: 'Peso colombiano (COP)', symbol: '$' },
-];
+import { getSupportedLanguages } from '../i18n';
 
 // ── Traveler profile label ────────────────────────────
-function getTravelerProfile(interests) {
+function getTravelerProfile(interests, t) {
   const top = Object.entries(interests).reduce((a, b) => b[1] > a[1] ? b : a, ['', 0]);
   const map = {
-    interestCulture:     { label: 'Explorador Cultural', icon: <Landmark size={24} /> },
-    interestReligion:    { label: 'Viajero Espiritual',  icon: <Church size={24} /> },
-    interestGastronomy:  { label: 'Gastrónomo Viajero', icon: <Utensils size={24} /> },
-    interestNature:      { label: 'Amante de la Naturaleza', icon: <TreePine size={24} /> },
-    interestArts:        { label: 'Bohemio Artístico',   icon: <Palette size={24} /> },
-    interestAdventure:   { label: 'Aventurero Urbano',   icon: <Map size={24} /> },
+    interestCulture:     { label: t('profile.cultural_explorer'), icon: <Landmark size={24} /> },
+    interestReligion:    { label: t('profile.spiritual_traveler'),  icon: <Church size={24} /> },
+    interestGastronomy:  { label: t('profile.gourmet_traveler'), icon: <Utensils size={24} /> },
+    interestNature:      { label: t('profile.nature_lover'), icon: <TreePine size={24} /> },
+    interestArts:        { label: t('profile.artistic_bohemian'),   icon: <Palette size={24} /> },
+    interestAdventure:   { label: t('profile.urban_adventurer'),   icon: <Map size={24} /> },
   };
-  return map[top[0]] || { label: 'Viajero Completo', icon: <Map size={24} /> };
+  return map[top[0]] || { label: t('profile.complete_traveler'), icon: <Map size={24} /> };
 }
 
 // ── Stepper ───────────────────────────────────────────
-const STEPS = ['Intereses', 'Logística', 'Confirmación'];
+function Stepper({ current, t }) {
+  const STEPS = [
+    t('preferences.step_language'),
+    t('preferences.step_interests'),
+    t('preferences.step_logistics'),
+    t('preferences.step_confirmation')
+  ];
 
-function Stepper({ current }) {
   return (
     <div className="pref-stepper">
       {STEPS.map((label, i) => {
@@ -113,7 +50,7 @@ function Stepper({ current }) {
 }
 
 // ── Slider component ──────────────────────────────────
-function InterestSlider({ item, value, onChange }) {
+function InterestSlider({ item, value, onChange, t }) {
   return (
     <div className="interest-item">
       <div className="interest-header">
@@ -135,7 +72,7 @@ function InterestSlider({ item, value, onChange }) {
         }}
       />
       <div className="interest-scale">
-        <span>Poco</span><span>Moderado</span><span>Máximo</span>
+        <span>{t('register.strength_weak')}</span><span>{t('register.strength_regular')}</span><span>{t('register.strength_strong')}</span>
       </div>
     </div>
   );
@@ -145,6 +82,7 @@ function InterestSlider({ item, value, onChange }) {
 export function PreferencesPage() {
   const navigate = useNavigate();
   const { user, token, savePreferences } = useAuth();
+  const { t, language, changeLanguage, loading: i18nLoading } = useI18n();
 
   const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -166,9 +104,80 @@ export function PreferencesPage() {
     groupType: 'SOLO',
     budget: null,
     currency: 'COP',
+    language: 'es',
   });
 
   const [budgetRanges, setBudgetRanges] = useState({});
+
+  // Interest categories with translations
+  const INTERESTS = [
+    {
+      key: 'interestCulture',
+      icon: <Landmark size={20} />,
+      label: t('interests.culture'),
+      desc: t('interests.culture_desc'),
+    },
+    {
+      key: 'interestReligion',
+      icon: <Church size={20} />,
+      label: t('interests.religion'),
+      desc: t('interests.religion_desc'),
+    },
+    {
+      key: 'interestGastronomy',
+      icon: <Utensils size={20} />,
+      label: t('interests.gastronomy'),
+      desc: t('interests.gastronomy_desc'),
+    },
+    {
+      key: 'interestNature',
+      icon: <TreePine size={20} />,
+      label: t('interests.nature'),
+      desc: t('interests.nature_desc'),
+    },
+    {
+      key: 'interestArts',
+      icon: <Palette size={20} />,
+      label: t('interests.arts'),
+      desc: t('interests.arts_desc'),
+    },
+    {
+      key: 'interestAdventure',
+      icon: <Map size={20} />,
+      label: t('interests.adventure'),
+      desc: t('interests.adventure_desc'),
+    },
+  ];
+
+  const TIME_OPTIONS = [
+    { value: 1, label: '1h', desc: t('time.quick') },
+    { value: 2, label: '2h', desc: t('time.express') },
+    { value: 4, label: '4h', desc: t('time.standard') },
+    { value: 6, label: '6h', desc: t('time.extended') },
+    { value: 8, label: '8h', desc: t('time.complete') },
+    { value: 10, label: '10h+', desc: t('time.full_day') },
+  ];
+
+  const GROUP_OPTIONS = [
+    { value: 'SOLO',   icon: <User size={18} />, label: t('group.solo') },
+    { value: 'COUPLE', icon: <HeartHandshake size={18} />, label: t('group.couple') },
+    { value: 'FAMILY', icon: <Users size={18} />, label: t('group.family') },
+    { value: 'GROUP',  icon: <Users size={18} />, label: t('group.group') },
+  ];
+
+  const MOBILITY_OPTIONS = [
+    { value: 'WALK',  icon: <Footprints size={18} />, label: t('mobility.walk'), desc: t('mobility.walk_desc') },
+    { value: 'MULTI', icon: <Car size={18} />, label: t('mobility.multi'), desc: t('mobility.multi_desc') },
+  ];
+
+  const CURRENCY_OPTIONS = [
+    { value: 'USD', label: t('currency.usd'), symbol: '$' },
+    { value: 'EUR', label: t('currency.eur'), symbol: '€' },
+    { value: 'GBP', label: t('currency.gbp'), symbol: '£' },
+    { value: 'JPY', label: t('currency.jpy'), symbol: '¥' },
+    { value: 'CNY', label: t('currency.cny'), symbol: '¥' },
+    { value: 'COP', label: t('currency.cop'), symbol: '$' },
+  ];
 
   React.useEffect(() => {
     const fetchBudgetRanges = async () => {
@@ -203,13 +212,19 @@ export function PreferencesPage() {
               interestArts: data.preferences.interestArts ?? 6,
               interestAdventure: data.preferences.interestAdventure ?? 5,
             });
+            const savedLanguage = data.preferences.language ?? 'es';
             setLogistics({
               defaultTimeAvailableHours: data.preferences.defaultTimeAvailableHours ?? 4,
               mobilityType: data.preferences.mobilityType ?? 'WALK',
               groupType: data.preferences.groupType ?? 'SOLO',
               budget: data.preferences.budget ?? null,
               currency: data.preferences.currency ?? 'COP',
+              language: savedLanguage,
             });
+            // Change language immediately when loaded
+            if (savedLanguage !== language) {
+              changeLanguage(savedLanguage);
+            }
           }
         }
       } catch (err) { }
@@ -229,10 +244,12 @@ export function PreferencesPage() {
       const dataToSend = logistics.budget
         ? { ...interests, ...logistics, profilePictureUrl: profilePicture }
         : { ...interests, ...logistics, profilePictureUrl: profilePicture, budget: null, currency: null };
+      // Always include language
+      dataToSend.language = logistics.language;
       await savePreferences(dataToSend);
       navigate('/editor');
     } catch (err) {
-      setError(err.message || 'Error guardando preferencias. Puedes cambiarlas luego.');
+      setError(err.message || t('user_profile.error_save'));
       // Still redirect after 2s even if it fails (backend may not be running)
       setTimeout(() => navigate('/editor'), 2000);
     } finally {
@@ -245,7 +262,7 @@ export function PreferencesPage() {
     if (!file) return;
 
     if (file.size > 5 * 1024 * 1024) {
-      setError('La imagen no puede pesar más de 5MB');
+      setError(t('register.error_image_size'));
       return;
     }
 
@@ -277,19 +294,77 @@ export function PreferencesPage() {
     reader.readAsDataURL(file);
   };
 
-  const profile = getTravelerProfile(interests);
+  const profile = getTravelerProfile(interests, t);
+
+  if (i18nLoading) {
+    return null;
+  }
 
   return (
     <div className="pref-shell">
       <div className="pref-card">
-        <Stepper current={step} />
+        <Stepper current={step} t={t} />
 
-        {/* ── Step 0: Interests ─────────────────────────── */}
+        {/* ── Step 0: Language ─────────────────────────── */}
         {step === 0 && (
           <>
-            <h2 className="pref-step-title">¿Qué te apasiona?</h2>
+            <h2 className="pref-step-title">{t('preferences.step1_title')}</h2>
             <p className="pref-step-desc">
-              Ajusta tus intereses del 1 al 10. El sistema priorizará los puntos de interés que más te gusten en cada ruta.
+              {t('preferences.step1_desc')}
+            </p>
+
+            {/* Language */}
+            <div className="pref-options-row">
+              <label className="pref-option-label" style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                <Globe size={18} /> {t('preferences.language')}
+              </label>
+              <div style={{marginTop: '1rem'}}>
+                <select
+                  value={logistics.language}
+                  onChange={e => {
+                    const newLang = e.target.value;
+                    setLogistics(l => ({ ...l, language: newLang }));
+                    changeLanguage(newLang);
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    backgroundColor: 'rgba(255,255,255,0.05)',
+                    color: 'white',
+                    fontSize: '1rem',
+                  }}
+                >
+                  {getSupportedLanguages().map(lang => (
+                    <option key={lang.code} value={lang.code} style={{backgroundColor: '#1a1a2e'}}>
+                      {lang.flag} {lang.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="pref-nav">
+              <button
+                className="pref-back-btn"
+                onClick={() => navigate('/editor')}
+              >
+                {t('preferences.skip')}
+              </button>
+              <button className="pref-next-btn" onClick={() => setStep(1)}>
+                {t('preferences.next')} →
+              </button>
+            </div>
+          </>
+        )}
+
+        {/* ── Step 1: Interests ─────────────────────────── */}
+        {step === 1 && (
+          <>
+            <h2 className="pref-step-title">{t('preferences.step2_title')}</h2>
+            <p className="pref-step-desc">
+              {t('preferences.step2_desc')}
             </p>
             <div className="interest-grid">
               {INTERESTS.map(item => (
@@ -298,35 +373,33 @@ export function PreferencesPage() {
                   item={item}
                   value={interests[item.key]}
                   onChange={handleInterestChange}
+                  t={t}
                 />
               ))}
             </div>
             <div className="pref-nav">
-              <button
-                className="pref-back-btn"
-                onClick={() => navigate('/editor')}
-              >
-                Omitir por ahora
+              <button className="pref-back-btn" onClick={() => setStep(0)}>
+                ← {t('preferences.back')}
               </button>
-              <button className="pref-next-btn" onClick={() => setStep(1)}>
-                Siguiente →
+              <button className="pref-next-btn" onClick={() => setStep(2)}>
+                {t('preferences.next')} →
               </button>
             </div>
           </>
         )}
 
-        {/* ── Step 1: Logistics ─────────────────────────── */}
-        {step === 1 && (
+        {/* ── Step 2: Logistics ─────────────────────────── */}
+        {step === 2 && (
           <>
-            <h2 className="pref-step-title">Cuéntanos más</h2>
+            <h2 className="pref-step-title">{t('preferences.step3_title')}</h2>
             <p className="pref-step-desc">
-              Estos parámetros ayudan al algoritmo a generar rutas que se adapten a tu tiempo y estilo de viaje.
+              {t('preferences.step3_desc')}
             </p>
 
             {/* Time */}
             <div className="pref-options-row">
               <label className="pref-option-label" style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
-                <Clock size={18} /> ¿Cuánto tiempo tienes disponible?
+                <Clock size={18} /> {t('preferences.time_available')}
               </label>
               <div className="pref-time-grid">
                 {TIME_OPTIONS.map(t => (
@@ -346,7 +419,7 @@ export function PreferencesPage() {
             {/* Group */}
             <div className="pref-options-row">
               <label className="pref-option-label" style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
-                <Users size={18} /> ¿Con quién viajas?
+                <Users size={18} /> {t('preferences.travel_with')}
               </label>
               <div className="pref-group-grid">
                 {GROUP_OPTIONS.map(g => (
@@ -366,7 +439,7 @@ export function PreferencesPage() {
             {/* Mobility */}
             <div className="pref-options-row">
               <label className="pref-option-label" style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
-                <Footprints size={18} /> ¿Cómo prefieres moverte?
+                <Footprints size={18} /> {t('preferences.mobility')}
               </label>
               <div className="pref-mobility-grid">
                 {MOBILITY_OPTIONS.map(m => (
@@ -387,7 +460,7 @@ export function PreferencesPage() {
             {/* Budget (Optional) */}
             <div className="pref-options-row">
               <label className="pref-option-label" style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
-                <span style={{fontSize: '18px'}}>💰</span> ¿Cuál es tu presupuesto estimado? (Opcional)
+                <span style={{fontSize: '18px'}}>💰</span> {t('preferences.budget')}
               </label>
               <div style={{marginTop: '1rem'}}>
                 <select
@@ -416,10 +489,10 @@ export function PreferencesPage() {
                       <span style={{fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)'}}>
                         {logistics.budget
                           ? `${CURRENCY_OPTIONS.find(c => c.value === logistics.currency)?.symbol} ${logistics.budget.toLocaleString()}`
-                          : 'Selecciona tu presupuesto'}
+                          : t('preferences.select_budget')}
                       </span>
                       <span style={{fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)'}}>
-                        {logistics.budget ? 'Presupuesto seleccionado' : 'Opcional'}
+                        {logistics.budget ? t('preferences.budget_selected') : t('preferences.optional')}
                       </span>
                     </div>
                     {budgetRanges[logistics.currency] ? (
@@ -446,7 +519,7 @@ export function PreferencesPage() {
                       </>
                     ) : (
                       <div style={{fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)'}}>
-                        Cargando rangos...
+                        {t('preferences.loading_ranges')}
                       </div>
                     )}
                   </div>
@@ -455,27 +528,29 @@ export function PreferencesPage() {
             </div>
 
             <div className="pref-nav">
-              <button className="pref-back-btn" onClick={() => setStep(0)}>← Atrás</button>
-              <button className="pref-next-btn" onClick={() => setStep(2)}>
-                Ver mi perfil →
+              <button className="pref-back-btn" onClick={() => setStep(1)}>
+                ← {t('preferences.back')}
+              </button>
+              <button className="pref-next-btn" onClick={() => setStep(3)}>
+                {t('preferences.next')} →
               </button>
             </div>
           </>
         )}
 
-        {/* ── Step 2: Confirmation ────────────────────────── */}
-        {step === 2 && (
+        {/* ── Step 3: Confirmation ────────────────────────── */}
+        {step === 3 && (
           <>
-            <h2 className="pref-step-title">¡Tu perfil está listo!</h2>
+            <h2 className="pref-step-title">{t('preferences.step3_title')}</h2>
             <p className="pref-step-desc">
-              Basado en tus respuestas, hemos generado tu perfil de viajero. Puedes modificarlo en cualquier momento.
+              {t('preferences.step3_desc')}
             </p>
 
             {/* Profile card */}
             <div className="pref-profile-card">
-              <label 
-                htmlFor="pref-avatar-upload" 
-                title="Cambiar foto de perfil"
+              <label
+                htmlFor="pref-avatar-upload"
+                title={t('user_profile.change_password')}
                 style={{
                   cursor: 'pointer', display: 'block', margin: '0 auto 1rem', width: '80px', height: '80px', position: 'relative'
                 }}
@@ -499,8 +574,8 @@ export function PreferencesPage() {
                 </div>
               </label>
               <input type="file" id="pref-avatar-upload" accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} />
-              
-              <div className="pref-profile-name">{user?.fullName || 'Viajero'}</div>
+
+              <div className="pref-profile-name">{user?.fullName || t('user_profile.tourist')}</div>
               <div className="pref-profile-type">{profile.label}</div>
               <div className="pref-summary-chips">
                 {INTERESTS
@@ -511,7 +586,7 @@ export function PreferencesPage() {
                     </div>
                   ))}
                 <div className="pref-summary-chip" style={{display: 'flex', alignItems: 'center', gap: '6px'}}>
-                  <Clock size={16} /> {logistics.defaultTimeAvailableHours}h disponibles
+                  <Clock size={16} /> {logistics.defaultTimeAvailableHours}h {t('register.hours')}
                 </div>
                 <div className="pref-summary-chip" style={{display: 'flex', alignItems: 'center', gap: '6px'}}>
                   {GROUP_OPTIONS.find(g => g.value === logistics.groupType)?.icon}
@@ -531,7 +606,9 @@ export function PreferencesPage() {
             )}
 
             <div className="pref-nav">
-              <button className="pref-back-btn" onClick={() => setStep(1)}>← Editar</button>
+              <button className="pref-back-btn" onClick={() => setStep(2)}>
+                ← {t('preferences.edit')}
+              </button>
               <button
                 className="pref-next-btn"
                 onClick={handleFinish}
@@ -539,8 +616,8 @@ export function PreferencesPage() {
                 style={{display: 'flex', alignItems: 'center', gap: '8px'}}
               >
                 {loading
-                  ? <><span className="auth-spinner" /> Guardando...</>
-                  : <>¡Comenzar a explorar! <Map size={18} /></>}
+                  ? <><span className="auth-spinner" /> {t('preferences.loading_ranges')}...</>
+                  : <>{t('preferences.finish')} <Map size={18} /></>}
               </button>
             </div>
           </>

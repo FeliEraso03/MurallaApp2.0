@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../utils/authContext";
+import { useI18n } from '../contexts/I18nContext';
 import "../auth.css";
 
 // ── SVG Icons ─────────────────────────────────────────
@@ -91,7 +92,7 @@ const IconEyeOff = () => (
   </svg>
 );
 
-function PasswordStrength({ password }) {
+function PasswordStrength({ password, t }) {
   const getStrength = (p) => {
     let score = 0;
     if (p.length >= 8) score++;
@@ -101,7 +102,7 @@ function PasswordStrength({ password }) {
     return score;
   };
   const s = getStrength(password);
-  const labels = ["", "Débil", "Regular", "Buena", "Fuerte"];
+  const labels = ["", t('register.weak'), t('register.fair'), t('register.good'), t('register.strong')];
   const colors = ["", "#e55d02", "#f4a021", "#00b4d8", "#4ade9b"];
   if (!password) return null;
   return (
@@ -128,6 +129,7 @@ function PasswordStrength({ password }) {
 export function RegisterPage() {
   const navigate = useNavigate();
   const { register } = useAuth();
+  const { t, language, changeLanguage, loading: i18nLoading } = useI18n();
 
   const [form, setForm] = useState({
     fullName: "",
@@ -148,6 +150,12 @@ export function RegisterPage() {
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState({});
 
+  useEffect(() => {
+    if (i18nLoading === false) {
+      // Language loaded
+    }
+  }, [i18nLoading]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((f) => ({ ...f, [name]: value }));
@@ -157,12 +165,12 @@ export function RegisterPage() {
 
   const validate = () => {
     const errs = {};
-    if (!form.fullName.trim()) errs.fullName = "Ingresa tu nombre completo.";
-    if (!form.email.includes("@")) errs.email = "Correo electrónico inválido.";
+    if (!form.fullName.trim()) errs.fullName = t('register.error_fullname');
+    if (!form.email.includes("@")) errs.email = t('register.error_email');
     if (form.password.length < 6)
-      errs.password = "La contraseña debe tener al menos 6 caracteres.";
+      errs.password = t('register.error_password');
     if (form.password !== form.confirm)
-      errs.confirm = "Las contraseñas no coinciden.";
+      errs.confirm = t('register.error_confirm');
     return errs;
   };
 
@@ -183,7 +191,7 @@ export function RegisterPage() {
       // Actually, let's still go to preferences just in case they want to adjust weights.
       navigate("/preferences");
     } catch (err) {
-      setError(err.message || "Error al crear la cuenta.");
+      setError(err.message || t('register.error_account'));
     } finally {
       setLoading(false);
     }
@@ -198,7 +206,7 @@ export function RegisterPage() {
     if (!file) return;
 
     if (file.size > 5 * 1024 * 1024) {
-      setError("La imagen no puede pesar más de 5MB");
+      setError(t('register.error_image_size'));
       return;
     }
 
@@ -237,6 +245,10 @@ export function RegisterPage() {
     reader.readAsDataURL(file);
   };
 
+  if (i18nLoading) {
+    return null;
+  }
+
   return (
     <div className="auth-shell">
       {/* Left panel */}
@@ -248,20 +260,18 @@ export function RegisterPage() {
             <span className="auth-brand-tag">2.0</span>
           </div>
           <h1 className="auth-tagline">
-            Tu ruta perfecta
-            <br />
-            <span>empieza aquí</span>
+            {t('register.tagline')}<br />
+            <span>{t('register.tagline_subtitle')}</span>
           </h1>
           <p className="auth-description">
-            Crea tu perfil de viajero y personaliza cada recorrido según tus
-            intereses. Arte, historia, gastronomía o aventura — tú decides.
+            {t('register.description')}
           </p>
           <div className="auth-features">
             {[
-              "Perfil de viajero personalizable",
-              "Preferencias guardadas entre sesiones",
-              "Algoritmos adaptados a tus intereses",
-              "Acceso al editor de grafos completo",
+              t('register.feature_1'),
+              t('register.feature_2'),
+              t('register.feature_3'),
+              t('register.feature_4'),
             ].map((f) => (
               <div className="auth-feature-item" key={f}>
                 <span className="auth-feature-dot" />
@@ -283,9 +293,9 @@ export function RegisterPage() {
             <span className="auth-brand-tag">2.0</span>
           </div>
 
-          <h2 className="auth-form-title">Crear cuenta</h2>
+          <h2 className="auth-form-title">{t('register.title')}</h2>
           <p className="auth-form-subtitle">
-            Únete y planifica tu recorrido por Cartagena
+            {t('register.subtitle')}
           </p>
 
           {error && (
@@ -315,12 +325,12 @@ export function RegisterPage() {
             id="register-google-btn"
           >
             <IconGoogle />
-            Registrarse con Google
+            {t('register.google_btn')}
           </button>
 
           <div className="auth-divider">
             <span className="auth-divider-line" />
-            <span className="auth-divider-text">o con correo</span>
+            <span className="auth-divider-text">{t('register.divider')}</span>
             <span className="auth-divider-line" />
           </div>
 
@@ -411,14 +421,14 @@ export function RegisterPage() {
                   marginTop: "8px",
                 }}
               >
-                Foto de perfil (opcional)
+                {t('register.photo_optional')}
               </span>
             </div>
 
             {/* Full name */}
             <div className="auth-field">
               <label className="auth-label" htmlFor="reg-fullname">
-                Nombre completo
+                {t('register.fullname_label')}
               </label>
               <div className="auth-input-wrap">
                 <span className="auth-input-icon">
@@ -429,7 +439,7 @@ export function RegisterPage() {
                   type="text"
                   name="fullName"
                   className={`auth-input ${fieldErrors.fullName ? "error" : ""}`}
-                  placeholder="Juan García"
+                  placeholder={t('register.fullname_placeholder')}
                   value={form.fullName}
                   onChange={handleChange}
                   autoComplete="name"
@@ -443,7 +453,7 @@ export function RegisterPage() {
             {/* Email */}
             <div className="auth-field">
               <label className="auth-label" htmlFor="reg-email">
-                Correo electrónico
+                {t('register.email_label')}
               </label>
               <div className="auth-input-wrap">
                 <span className="auth-input-icon">
@@ -454,7 +464,7 @@ export function RegisterPage() {
                   type="email"
                   name="email"
                   className={`auth-input ${fieldErrors.email ? "error" : ""}`}
-                  placeholder="tucorreo@ejemplo.com"
+                  placeholder={t('register.email_placeholder')}
                   value={form.email}
                   onChange={handleChange}
                   autoComplete="email"
@@ -468,7 +478,7 @@ export function RegisterPage() {
             {/* Password */}
             <div className="auth-field">
               <label className="auth-label" htmlFor="reg-password">
-                Contraseña
+                {t('register.password_label')}
               </label>
               <div className="auth-input-wrap">
                 <span className="auth-input-icon">
@@ -479,7 +489,7 @@ export function RegisterPage() {
                   type={showPass ? "text" : "password"}
                   name="password"
                   className={`auth-input ${fieldErrors.password ? "error" : ""}`}
-                  placeholder="Mínimo 6 caracteres"
+                  placeholder={t('register.password_placeholder')}
                   value={form.password}
                   onChange={handleChange}
                   autoComplete="new-password"
@@ -500,12 +510,12 @@ export function RegisterPage() {
                     display: "flex",
                     alignItems: "center",
                   }}
-                  aria-label={showPass ? "Ocultar" : "Mostrar"}
+                  aria-label={showPass ? t('register.hide_password') : t('register.show_password')}
                 >
                   {showPass ? <IconEyeOff /> : <IconEye />}
                 </button>
               </div>
-              <PasswordStrength password={form.password} />
+              <PasswordStrength password={form.password} t={t} />
               {fieldErrors.password && (
                 <p className="auth-error-text">{fieldErrors.password}</p>
               )}
@@ -514,7 +524,7 @@ export function RegisterPage() {
             {/* Confirm password */}
             <div className="auth-field">
               <label className="auth-label" htmlFor="reg-confirm">
-                Confirmar contraseña
+                {t('register.confirm_label')}
               </label>
               <div className="auth-input-wrap">
                 <span className="auth-input-icon">
@@ -525,7 +535,7 @@ export function RegisterPage() {
                   type={showPass ? "text" : "password"}
                   name="confirm"
                   className={`auth-input ${fieldErrors.confirm ? "error" : ""}`}
-                  placeholder="Repite tu contraseña"
+                  placeholder={t('register.confirm_placeholder')}
                   value={form.confirm}
                   onChange={handleChange}
                   autoComplete="new-password"
@@ -556,7 +566,7 @@ export function RegisterPage() {
                   fontWeight: '500'
                 }}
               >
-                <span>Configuración del Viaje (Opcional)</span>
+                <span>{t('register.travel_config')}</span>
                 <svg 
                   width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" 
                   style={{ transform: showOptional ? 'rotate(180deg)' : 'none', transition: 'transform 0.3s' }}
@@ -578,51 +588,51 @@ export function RegisterPage() {
                   animation: 'slideDown 0.3s ease-out'
                 }}>
                   <div className="auth-field" style={{ gridColumn: 'span 2', marginBottom: 0 }}>
-                    <label className="auth-label">Género</label>
+                    <label className="auth-label">{t('register.gender_label')}</label>
                     <select name="gender" className="auth-input" value={form.gender} onChange={handleChange} style={{ paddingLeft: '12px', appearance: 'auto' }}>
-                      <option value="">Prefiero no decirlo</option>
-                      <option value="MALE">Masculino</option>
-                      <option value="FEMALE">Femenino</option>
-                      <option value="OTHER">Otro</option>
+                      <option value="">{t('register.gender_prefer_not')}</option>
+                      <option value="MALE">{t('register.gender_male')}</option>
+                      <option value="FEMALE">{t('register.gender_female')}</option>
+                      <option value="OTHER">{t('register.gender_other')}</option>
                     </select>
                   </div>
 
                   <div className="auth-field" style={{ marginBottom: 0 }}>
-                    <label className="auth-label">Edad</label>
+                    <label className="auth-label">{t('register.age_label')}</label>
                     <select name="ageRange" className="auth-input" value={form.ageRange} onChange={handleChange} style={{ paddingLeft: '12px', appearance: 'auto' }}>
-                      <option value="">No especificado</option>
-                      <option value="18-25">18-25 años</option>
-                      <option value="26-35">26-35 años</option>
-                      <option value="36-50">36-50 años</option>
-                      <option value="50+">Más de 50</option>
+                      <option value="">{t('register.age_not_specified')}</option>
+                      <option value="18-25">{t('register.age_18_25')}</option>
+                      <option value="26-35">{t('register.age_26_35')}</option>
+                      <option value="36-50">{t('register.age_36_50')}</option>
+                      <option value="50+">{t('register.age_50_plus')}</option>
                     </select>
                   </div>
 
                   <div className="auth-field" style={{ marginBottom: 0 }}>
-                    <label className="auth-label">Turista</label>
+                    <label className="auth-label">{t('register.tourist_label')}</label>
                     <select name="touristType" className="auth-input" value={form.touristType} onChange={handleChange} style={{ paddingLeft: '12px', appearance: 'auto' }}>
-                      <option value="">No especificado</option>
-                      <option value="LOCAL">Local</option>
-                      <option value="NATIONAL">Nacional</option>
-                      <option value="INTERNATIONAL">Internacional</option>
+                      <option value="">{t('register.tourist_not_specified')}</option>
+                      <option value="LOCAL">{t('register.tourist_local')}</option>
+                      <option value="NATIONAL">{t('register.tourist_national')}</option>
+                      <option value="INTERNATIONAL">{t('register.tourist_international')}</option>
                     </select>
                   </div>
 
                   <div className="auth-field" style={{ marginBottom: 0 }}>
-                    <label className="auth-label">Movilidad</label>
+                    <label className="auth-label">{t('register.mobility_label')}</label>
                     <select name="mobilityType" className="auth-input" value={form.mobilityType} onChange={handleChange} style={{ paddingLeft: '12px', appearance: 'auto' }}>
-                      <option value="WALK">Caminata</option>
-                      <option value="MULTI">Múltiple</option>
+                      <option value="WALK">{t('register.mobility_walk')}</option>
+                      <option value="MULTI">{t('register.mobility_multi')}</option>
                     </select>
                   </div>
 
                   <div className="auth-field" style={{ marginBottom: 0 }}>
-                    <label className="auth-label">Horas</label>
+                    <label className="auth-label">{t('register.hours_label')}</label>
                     <select name="defaultTimeAvailableHours" className="auth-input" value={form.defaultTimeAvailableHours} onChange={handleChange} style={{ paddingLeft: '12px', appearance: 'auto' }}>
-                      <option value={2}>2 horas</option>
-                      <option value={4}>4 horas</option>
-                      <option value={6}>6 horas</option>
-                      <option value={8}>8 horas</option>
+                      <option value={2}>2 {t('register.hours')}</option>
+                      <option value={4}>4 {t('register.hours')}</option>
+                      <option value={6}>6 {t('register.hours')}</option>
+                      <option value={8}>8 {t('register.hours')}</option>
                     </select>
                   </div>
                 </div>
@@ -637,18 +647,18 @@ export function RegisterPage() {
             >
               {loading ? (
                 <>
-                  <span className="auth-spinner" /> Creando cuenta...
+                  <span className="auth-spinner" /> {t('register.creating')}
                 </>
               ) : (
-                "Crear cuenta y confirmar →"
+                t('register.submit')
               )}
             </button>
           </form>
 
           <div className="auth-switch">
-            ¿Ya tienes cuenta?{" "}
+            {t('register.has_account')}{" "}
             <button type="button" onClick={() => navigate("/login")}>
-              Inicia sesión
+              {t('register.login_link')}
             </button>
           </div>
         </div>

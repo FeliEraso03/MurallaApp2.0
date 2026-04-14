@@ -1,10 +1,23 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../utils/authContext';
+import { useI18n } from '../contexts/I18nContext';
 
 export function Navbar({ activePage }) {
     const navigate = useNavigate();
     const { user, logout } = useAuth();
+    const { t, language, changeLanguage, loading } = useI18n();
+
+    useEffect(() => {
+        // Try to get language from user preferences
+        if (user?.preferences?.language) {
+            changeLanguage(user.preferences.language);
+        }
+    }, [user, changeLanguage]);
+
+    if (loading) {
+        return null;
+    }
 
     return (
         <nav className="navbar" style={{ padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--navy)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
@@ -12,17 +25,17 @@ export function Navbar({ activePage }) {
                 Muralla App <span className="brand-tag">2.0</span>
             </div>
             <div className="navbar-links" style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-                <Link to="/" className={`nav-link ${activePage === 'home' ? 'active' : ''}`}>Home</Link>
-                <Link to="/instructions" className={`nav-link ${activePage === 'instructions' ? 'active' : ''}`}>Instrucciones</Link>
-                <Link to="/about" className={`nav-link ${activePage === 'about' ? 'active' : ''}`}>Acerca de</Link>
+                <Link to="/" className={`nav-link ${activePage === 'home' ? 'active' : ''}`}>{t('navbar.home')}</Link>
+                <Link to="/instructions" className={`nav-link ${activePage === 'instructions' ? 'active' : ''}`}>{t('navbar.instructions')}</Link>
+                <Link to="/about" className={`nav-link ${activePage === 'about' ? 'active' : ''}`}>{t('navbar.about')}</Link>
                 
                 {user ? (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginLeft: '20px' }}>
-                        <Link to="/editor" className="nav-link" style={{ color: 'var(--orange)', fontWeight: 600 }}>Editor</Link>
+                        <Link to="/editor" className="nav-link" style={{ color: 'var(--orange)', fontWeight: 600 }}>{t('navbar.editor')}</Link>
                         
                         {/* Profile Logo / Avatar */}
                         <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <Link to="/profile" title="Ir a mi perfil / Preferencias" style={{
+                            <Link to="/profile" title={t('navbar.profile_title')} style={{
                                 width: '40px', height: '40px', borderRadius: '50%',
                                 background: 'linear-gradient(135deg, var(--orange), #e55d02)',
                                 color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -43,7 +56,7 @@ export function Navbar({ activePage }) {
                                     color: 'rgba(255,255,255,0.5)', fontSize: '0.85rem'
                                 }}
                             >
-                                Cerrar sesión
+                                {t('navbar.logout')}
                             </button>
                         </div>
                     </div>
@@ -56,7 +69,7 @@ export function Navbar({ activePage }) {
                             textDecoration: 'none', fontWeight: 700, fontSize: '0.88rem', marginLeft: '10px'
                         }}
                     >
-                        Iniciar sesión
+                        {t('navbar.login')}
                     </Link>
                 )}
             </div>
