@@ -28,4 +28,12 @@ public class PreferenceRequest {
     private Integer interestNature;
     private Integer interestArts;
     private Integer interestAdventure;
+
+    // ── Budget preferences ─────────────────────────────
+
+    /** Estimated budget for the trip (optional, in user's preferred currency) */
+    private java.math.BigDecimal budget;
+
+    /** Preferred currency code: USD, EUR, GBP, JPY, CNY, COP */
+    private String currency;
 }

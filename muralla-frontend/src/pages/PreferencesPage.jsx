@@ -65,6 +65,15 @@ const MOBILITY_OPTIONS = [
   { value: 'MULTI', icon: <Car size={18} />, label: 'Combinado', desc: 'Coche de caballos, tuk-tuk + caminata' },
 ];
 
+const CURRENCY_OPTIONS = [
+  { value: 'USD', label: 'Dólar estadounidense (USD)', symbol: '$' },
+  { value: 'EUR', label: 'Euro (EUR)', symbol: '€' },
+  { value: 'GBP', label: 'Libra esterlina (GBP)', symbol: '£' },
+  { value: 'JPY', label: 'Yen japonés (JPY)', symbol: '¥' },
+  { value: 'CNY', label: 'Yuan chino (CNY)', symbol: '¥' },
+  { value: 'COP', label: 'Peso colombiano (COP)', symbol: '$' },
+];
+
 // ── Traveler profile label ────────────────────────────
 function getTravelerProfile(interests) {
   const top = Object.entries(interests).reduce((a, b) => b[1] > a[1] ? b : a, ['', 0]);
@@ -155,7 +164,26 @@ export function PreferencesPage() {
     defaultTimeAvailableHours: 4,
     mobilityType: 'WALK',
     groupType: 'SOLO',
+    budget: null,
+    currency: 'COP',
   });
+
+  const [budgetRanges, setBudgetRanges] = useState({});
+
+  React.useEffect(() => {
+    const fetchBudgetRanges = async () => {
+      try {
+        const resp = await fetch('/api/users/budget-ranges');
+        if (resp.ok) {
+          const data = await resp.json();
+          setBudgetRanges(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch budget ranges:', err);
+      }
+    };
+    fetchBudgetRanges();
+  }, []);
 
   React.useEffect(() => {
     const fetchMe = async () => {
@@ -179,6 +207,8 @@ export function PreferencesPage() {
               defaultTimeAvailableHours: data.preferences.defaultTimeAvailableHours ?? 4,
               mobilityType: data.preferences.mobilityType ?? 'WALK',
               groupType: data.preferences.groupType ?? 'SOLO',
+              budget: data.preferences.budget ?? null,
+              currency: data.preferences.currency ?? 'COP',
             });
           }
         }
@@ -195,7 +225,11 @@ export function PreferencesPage() {
     setLoading(true);
     setError('');
     try {
-      await savePreferences({ ...interests, ...logistics, profilePictureUrl: profilePicture });
+      // Only include budget and currency if budget is not null
+      const dataToSend = logistics.budget
+        ? { ...interests, ...logistics, profilePictureUrl: profilePicture }
+        : { ...interests, ...logistics, profilePictureUrl: profilePicture, budget: null, currency: null };
+      await savePreferences(dataToSend);
       navigate('/editor');
     } catch (err) {
       setError(err.message || 'Error guardando preferencias. Puedes cambiarlas luego.');
@@ -347,6 +381,76 @@ export function PreferencesPage() {
                     <small>{m.desc}</small>
                   </button>
                 ))}
+              </div>
+            </div>
+
+            {/* Budget (Optional) */}
+            <div className="pref-options-row">
+              <label className="pref-option-label" style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
+                <span style={{fontSize: '18px'}}>💰</span> ¿Cuál es tu presupuesto estimado? (Opcional)
+              </label>
+              <div style={{marginTop: '1rem'}}>
+                <select
+                  value={logistics.currency}
+                  onChange={e => setLogistics(l => ({ ...l, currency: e.target.value, budget: null }))}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem',
+                    borderRadius: '8px',
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    backgroundColor: 'rgba(255,255,255,0.05)',
+                    color: 'white',
+                    fontSize: '1rem',
+                    marginBottom: '1rem',
+                  }}
+                >
+                  {CURRENCY_OPTIONS.map(c => (
+                    <option key={c.value} value={c.value} style={{backgroundColor: '#1a1a2e'}}>
+                      {c.label}
+                    </option>
+                  ))}
+                </select>
+                {logistics.currency && (
+                  <div style={{marginTop: '1rem'}}>
+                    <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem'}}>
+                      <span style={{fontSize: '0.9rem', color: 'rgba(255,255,255,0.7)'}}>
+                        {logistics.budget
+                          ? `${CURRENCY_OPTIONS.find(c => c.value === logistics.currency)?.symbol} ${logistics.budget.toLocaleString()}`
+                          : 'Selecciona tu presupuesto'}
+                      </span>
+                      <span style={{fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)'}}>
+                        {logistics.budget ? 'Presupuesto seleccionado' : 'Opcional'}
+                      </span>
+                    </div>
+                    {budgetRanges[logistics.currency] ? (
+                      <>
+                        <input
+                          type="range"
+                          min={budgetRanges[logistics.currency]?.min || 0}
+                          max={budgetRanges[logistics.currency]?.max || 1000}
+                          step={budgetRanges[logistics.currency]?.step || 10}
+                          value={logistics.budget || budgetRanges[logistics.currency]?.min || 0}
+                          onChange={e => setLogistics(l => ({ ...l, budget: parseInt(e.target.value) }))}
+                          style={{
+                            width: '100%',
+                            height: '8px',
+                            borderRadius: '4px',
+                            background: `linear-gradient(to right, var(--orange) 0%, var(--orange) ${((logistics.budget || budgetRanges[logistics.currency]?.min || 0) - (budgetRanges[logistics.currency]?.min || 0)) / ((budgetRanges[logistics.currency]?.max || 1000) - (budgetRanges[logistics.currency]?.min || 0)) * 100}%, rgba(255,255,255,0.1) ${((logistics.budget || budgetRanges[logistics.currency]?.min || 0) - (budgetRanges[logistics.currency]?.min || 0)) / ((budgetRanges[logistics.currency]?.max || 1000) - (budgetRanges[logistics.currency]?.min || 0)) * 100}%)`,
+                            cursor: 'pointer',
+                          }}
+                        />
+                        <div style={{display: 'flex', justifyContent: 'space-between', marginTop: '0.5rem', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)'}}>
+                          <span>{CURRENCY_OPTIONS.find(c => c.value === logistics.currency)?.symbol} {Math.floor(budgetRanges[logistics.currency]?.min)?.toLocaleString()}</span>
+                          <span>{CURRENCY_OPTIONS.find(c => c.value === logistics.currency)?.symbol} {Math.floor(budgetRanges[logistics.currency]?.max)?.toLocaleString()}</span>
+                        </div>
+                      </>
+                    ) : (
+                      <div style={{fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)'}}>
+                        Cargando rangos...
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 

@@ -60,4 +60,12 @@ public class UserPreference {
 
     /** Urban exploration and off-the-beaten-path */
     private Integer interestAdventure;
+
+    // ── Budget preferences ─────────────────────────────
+
+    /** Estimated budget for the trip (optional, stored in COP internally) */
+    private java.math.BigDecimal budget;
+
+    /** Preferred currency code: USD, EUR, GBP, JPY, CNY, COP */
+    private String currency;
 }
