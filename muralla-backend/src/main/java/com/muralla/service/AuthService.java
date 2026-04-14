@@ -13,6 +13,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -53,7 +54,7 @@ public class AuthService {
         // Bidirectional consistency
         preference.setUser(user);
 
-        repository.save(user);
+        user = repository.save(user);
 
         var jwtToken = jwtService.generateToken(user);
 
@@ -88,5 +89,34 @@ public class AuthService {
 
     private Integer orDefault(Integer value, Integer fallback) {
         return value != null ? value : fallback;
+    }
+
+    @Transactional
+    public User createOrGetOAuth2User(String email, String fullName, String picture) {
+        return repository.findByEmail(email).orElseGet(() -> {
+            UserPreference pref = UserPreference.builder()
+                    .defaultTimeAvailableHours(4)
+                    .mobilityType("WALK")
+                    .groupType("SOLO")
+                    .interestCulture(5)
+                    .interestReligion(5)
+                    .interestGastronomy(5)
+                    .interestNature(5)
+                    .interestArts(5)
+                    .interestAdventure(5)
+                    .build();
+
+            User newUser = User.builder()
+                    .fullName(fullName)
+                    .email(email)
+                    .profilePictureUrl(picture)
+                    .password("") // no password for OAuth2 users
+                    .role(Role.USER)
+                    .preference(pref)
+                    .build();
+
+            pref.setUser(newUser);
+            return repository.save(newUser);
+        });
     }
 }

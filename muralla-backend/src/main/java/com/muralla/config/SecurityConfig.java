@@ -1,11 +1,9 @@
 package com.muralla.config;
 
-import com.muralla.model.Role;
 import com.muralla.model.User;
-import com.muralla.model.UserPreference;
-import com.muralla.repository.UserRepository;
 import com.muralla.security.JwtAuthenticationFilter;
 import com.muralla.security.JwtService;
+import com.muralla.service.OAuth2UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +35,7 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
     private final JwtService jwtService;
-    private final UserRepository userRepository;
+    private final OAuth2UserService oAuth2UserService;
 
     @Value("${app.frontend.url:http://localhost:5173}")
     private String frontendUrl;
@@ -88,33 +86,8 @@ public class SecurityConfig {
                 String fullName = oauth2User.getAttribute("name");
                 String picture  = oauth2User.getAttribute("picture");
 
-                // Find or create user
-                User user = userRepository.findByEmail(email).orElseGet(() -> {
-                    UserPreference pref = UserPreference.builder()
-                            .defaultTimeAvailableHours(4)
-                            .mobilityType("WALK")
-                            .groupType("SOLO")
-                            .interestCulture(5)
-                            .interestReligion(5)
-                            .interestGastronomy(5)
-                            .interestNature(5)
-                            .interestArts(5)
-                            .interestAdventure(5)
-                            .build();
-
-                    User newUser = User.builder()
-                            .fullName(fullName)
-                            .email(email)
-                            .profilePictureUrl(picture)
-                            .password("") // no password for OAuth2 users
-                            .role(Role.USER)
-                            .preference(pref)
-                            .build();
-
-                    pref.setUser(newUser);
-                    User saved = userRepository.save(newUser);
-                    return saved;
-                });
+                // Find or create user with transactional save
+                User user = oAuth2UserService.createOrGetOAuth2User(email, fullName, picture);
 
                 String token = jwtService.generateToken(user);
 
