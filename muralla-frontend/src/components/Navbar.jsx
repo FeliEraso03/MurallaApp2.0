@@ -21,18 +21,18 @@ export function Navbar({ activePage }) {
 
     return (
         <nav className="navbar" style={{ padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--navy)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-            <div className="navbar-brand">
+            <Link to="/" className="navbar-brand" style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
                 Muralla App <span className="brand-tag">2.0</span>
-            </div>
+            </Link>
             <div className="navbar-links" style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
                 <Link to="/" className={`nav-link ${activePage === 'home' ? 'active' : ''}`}>{t('navbar.home')}</Link>
                 <Link to="/instructions" className={`nav-link ${activePage === 'instructions' ? 'active' : ''}`}>{t('navbar.instructions')}</Link>
                 <Link to="/about" className={`nav-link ${activePage === 'about' ? 'active' : ''}`}>{t('navbar.about')}</Link>
-                
+
                 {user ? (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginLeft: '20px' }}>
                         <Link to="/editor" className="nav-link" style={{ color: 'var(--orange)', fontWeight: 600 }}>{t('navbar.editor')}</Link>
-                        
+
                         {/* Profile Logo / Avatar */}
                         <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '10px' }}>
                             <Link to="/profile" title={t('navbar.profile_title')} style={{
@@ -73,6 +73,38 @@ export function Navbar({ activePage }) {
                     </Link>
                 )}
             </div>
+            <style>{`
+                @media (max-width: 768px) {
+                    .navbar {
+                        padding: 0.75rem 1rem !important;
+                    }
+                    .navbar-links {
+                        gap: 12px !important;
+                    }
+                    .nav-link {
+                        font-size: 0.85rem !important;
+                    }
+                    .navbar-brand {
+                        font-size: 1.1rem !important;
+                    }
+                }
+                @media (max-width: 640px) {
+                    .navbar-links {
+                        gap: 8px !important;
+                    }
+                    .nav-link {
+                        font-size: 0.75rem !important;
+                        padding: 0 4px !important;
+                    }
+                    .navbar-brand {
+                        font-size: 1rem !important;
+                    }
+                    .navbar-brand .brand-tag {
+                        font-size: 0.6rem !important;
+                        padding: 2px 6px !important;
+                    }
+                }
+            `}</style>
         </nav>
     );
 }

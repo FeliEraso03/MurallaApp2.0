@@ -32,8 +32,12 @@ export function AuthProvider({ children }) {
     }
     const data = await resp.json();
     persist(data);
-    // Existing users skip the preferences wizard
-    localStorage.setItem('muralla_prefs_done', '1');
+    // Check if user has preferences saved before marking as done
+    if (data.preferences && data.preferences.language) {
+      localStorage.setItem('muralla_prefs_done', '1');
+    } else {
+      localStorage.removeItem('muralla_prefs_done');
+    }
     return data;
   };
 

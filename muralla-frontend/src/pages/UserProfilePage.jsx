@@ -161,7 +161,7 @@ export function UserProfilePage() {
 
   return (
     <div className="auth-shell">
-      <div className="auth-panel-left hidden-mobile" style={{ flex: 1 }}>
+      <div className="auth-panel-left hidden-mobile" style={{ flex: 1.5 }}>
         <div
           className="auth-illustration"
           style={{ filter: "hue-rotate(30deg) brightness(0.9)" }}
@@ -190,11 +190,11 @@ export function UserProfilePage() {
 
       <div
         className="auth-panel-right"
-        style={{ flex: 2, background: "var(--bg-card)" }}
+        style={{ flex: 1, background: "var(--bg-card)" }}
       >
         <div
           className="auth-form-card"
-          style={{ maxWidth: "600px", margin: "0 auto" }}
+          style={{ maxWidth: "100%", margin: "0 auto" }}
         >
           <div
             className="profile-header"
