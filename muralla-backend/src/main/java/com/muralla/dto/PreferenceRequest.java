@@ -36,4 +36,9 @@ public class PreferenceRequest {
 
     /** Preferred currency code: USD, EUR, GBP, JPY, CNY, COP */
     private String currency;
+
+    // ── Language preference ─────────────────────────────
+
+    /** Preferred language code: es, en, pt, zh, hi, ar (based on Cartagena visitor data + top 5 global) */
+    private String language;
 }

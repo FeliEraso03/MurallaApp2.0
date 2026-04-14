@@ -90,6 +90,11 @@ public class UserController {
             pref.setCurrency(req.getCurrency());
         }
 
+        // Handle language preference
+        if (req.getLanguage() != null) {
+            pref.setLanguage(req.getLanguage());
+        }
+
         user.setPreference(pref);
         userRepository.save(user);
 
@@ -190,6 +195,7 @@ public class UserController {
             pCopy.setInterestAdventure(p.getInterestAdventure());
             pCopy.setBudget(budgetInUserCurrency);
             pCopy.setCurrency(p.getCurrency());
+            pCopy.setLanguage(p.getLanguage());
             response.put("preferences", pCopy);
         } else {
             response.put("preferences", p);
