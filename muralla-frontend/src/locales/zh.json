@@ -237,6 +237,7 @@
         "step3_alt": "路线算法可视化",
         "step4_title": "k-best解决方案（高级）",
         "step4_desc": "使用Resolve Graph将图发送到P-graph引擎。您将获得替代解决方案的目录。非常适合在主道路受阻时评估平行路线。",
+        "step4_alt": "替代路线可视化",
         "step5_title": "热图（密度）",
         "step5_desc": "切换到热图层以可视化关键拥堵区域。此分析对于预测人员将聚集在哪里并在阻塞发生之前重定向它们至关重要。",
         "step5_alt": "热图可视化",
@@ -404,9 +405,17 @@
         "dark_mode_desc": "仅2D",
         "light_mode": "浅色",
         "light_mode_desc": "2D和3D",
-        "profile_title": "转到我的个人资料/偏好设置",
-        "logout": "退出登录",
-        "login": "登录"
+        "route_params": "路线参数",
+        "experience_preference": "体验偏好",
+        "historic_colonial": "历史殖民",
+        "gastronomic_maritime": "美食海洋",
+        "religious_cultural": "宗教文化",
+        "beach_tourism": "海滩旅游",
+        "calculating_routes": "计算路线中…",
+        "generate_routes": "生成P-graph路线",
+        "route": "路线",
+        "active": "活动",
+        "visualization": "可视化"
     },
     "interests": {
         "culture": "文化和历史",
