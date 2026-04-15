@@ -34,18 +34,22 @@ export function OAuth2CallbackPage() {
     }
 
     // Persist the session (same as after a normal login)
-    persistOAuth({ 
-      token, 
-      email, 
-      fullName: decodeURIComponent(name || ''),
-      profilePictureUrl: picture ? decodeURIComponent(picture) : null
-    });
-    setStatus('¡Autenticado! Redirigiendo...');
+    const doPersist = async () => {
+      await persistOAuth({
+        token,
+        email,
+        fullName: decodeURIComponent(name || ''),
+        profilePictureUrl: picture ? decodeURIComponent(picture) : null
+      });
+      setStatus('¡Autenticado! Redirigiendo...');
 
-    // New user via Google goes to preferences wizard; existing users go to editor
-    // We check localStorage for an existing "preferences_completed" flag
-    const prefsCompleted = localStorage.getItem('muralla_prefs_done');
-    setTimeout(() => navigate(prefsCompleted ? '/editor' : '/preferences'), 1000);
+      // New user via Google goes to preferences wizard; existing users go to editor
+      // We check localStorage for an existing "preferences_completed" flag
+      const prefsCompleted = localStorage.getItem('muralla_prefs_done');
+      setTimeout(() => navigate(prefsCompleted ? '/editor' : '/preferences'), 1000);
+    };
+
+    doPersist();
   }, []);
 
   return (

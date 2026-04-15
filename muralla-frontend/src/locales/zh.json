@@ -82,6 +82,7 @@
         "login_btn": "登录",
         "submit": "登录",
         "verifying": "验证中...",
+        "verifying_preferences": "正在验证偏好设置...",
         "no_account": "没有账户？",
         "register_link": "免费注册",
         "register_free": "免费注册",

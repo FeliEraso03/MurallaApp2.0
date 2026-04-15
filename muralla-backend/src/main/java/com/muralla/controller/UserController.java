@@ -95,6 +95,9 @@ public class UserController {
             pref.setLanguage(req.getLanguage());
         }
 
+        // Mark preferences as seen (even if user skipped some fields)
+        pref.setPreferencesSeen(true);
+
         user.setPreference(pref);
         userRepository.save(user);
 
@@ -175,10 +178,8 @@ public class UserController {
         response.put("fullName", user.getFullName());
         response.put("profilePictureUrl", user.getProfilePictureUrl());
 
-        // Convert budget from COP to user's preferred currency
-        if (p != null && p.getBudget() != null && p.getCurrency() != null) {
-            java.math.BigDecimal budgetInUserCurrency = currencyConversionService.convertFromCOP(p.getBudget(), p.getCurrency());
-            // Create a copy of the preference with converted budget
+        if (p != null) {
+            // Create a copy of the preference to avoid modifying the original
             UserPreference pCopy = new UserPreference();
             pCopy.setId(p.getId());
             pCopy.setDefaultTimeAvailableHours(p.getDefaultTimeAvailableHours());
@@ -193,12 +194,20 @@ public class UserController {
             pCopy.setInterestNature(p.getInterestNature());
             pCopy.setInterestArts(p.getInterestArts());
             pCopy.setInterestAdventure(p.getInterestAdventure());
-            pCopy.setBudget(budgetInUserCurrency);
-            pCopy.setCurrency(p.getCurrency());
             pCopy.setLanguage(p.getLanguage());
+            pCopy.setPreferencesSeen(p.getPreferencesSeen() != null ? p.getPreferencesSeen() : false);
+
+            // Convert budget from COP to user's preferred currency if budget exists
+            if (p.getBudget() != null && p.getCurrency() != null) {
+                java.math.BigDecimal budgetInUserCurrency = currencyConversionService.convertFromCOP(p.getBudget(), p.getCurrency());
+                pCopy.setBudget(budgetInUserCurrency);
+                pCopy.setCurrency(p.getCurrency());
+            } else {
+                pCopy.setBudget(p.getBudget());
+                pCopy.setCurrency(p.getCurrency());
+            }
+
             response.put("preferences", pCopy);
-        } else {
-            response.put("preferences", p);
         }
 
         return response;

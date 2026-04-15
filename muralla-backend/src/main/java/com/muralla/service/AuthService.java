@@ -84,6 +84,7 @@ public class AuthService {
                 .email(user.getEmail())
                 .fullName(user.getFullName())
                 .profilePictureUrl(user.getProfilePictureUrl())
+                .preferences(user.getPreference())
                 .build();
     }
 
@@ -104,6 +105,7 @@ public class AuthService {
                     .interestNature(5)
                     .interestArts(5)
                     .interestAdventure(5)
+                    .preferencesSeen(false) // New OAuth2 users haven't completed wizard yet
                     .build();
 
             User newUser = User.builder()

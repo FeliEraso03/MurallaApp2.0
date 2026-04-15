@@ -59,9 +59,13 @@ export function LoginPage() {
     e.preventDefault();
     if (!form.email || !form.password) { setError(t('login.error_fields')); return; }
     setLoading(true);
+    setError('');
     try {
       await login(form.email, form.password);
-      navigate('/editor');
+      // Wait a moment to ensure preferences verification completes
+      await new Promise(resolve => setTimeout(resolve, 800));
+      const prefsDone = localStorage.getItem('muralla_prefs_done');
+      navigate(prefsDone ? '/editor' : '/preferences');
     } catch (err) {
       setError(err.message || t('login.error_login'));
     } finally {
@@ -76,6 +80,30 @@ export function LoginPage() {
 
   if (i18nLoading) {
     return null;
+  }
+
+  if (loading) {
+    return (
+      <div className="pref-shell">
+        <div style={{
+          textAlign: 'center',
+          color: 'rgba(255,255,255,0.8)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '1.5rem',
+        }}>
+          <div style={{
+            width: '52px', height: '52px',
+            border: '3px solid rgba(255,255,255,0.15)',
+            borderTopColor: 'var(--orange)',
+            borderRadius: '50%',
+            animation: 'spin 0.8s linear infinite',
+          }} />
+          <p style={{ fontSize: '1rem' }}>{t('login.verifying_preferences')}</p>
+        </div>
+      </div>
+    );
   }
 
   return (

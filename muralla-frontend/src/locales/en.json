@@ -81,6 +81,7 @@
         "login_btn": "Sign in",
         "submit": "Sign in",
         "verifying": "Verifying...",
+        "verifying_preferences": "Verifying preferences...",
         "no_account": "Don't have an account?",
         "register_link": "Register for free",
         "register_free": "Register for free",

@@ -73,4 +73,9 @@ public class UserPreference {
 
     /** Preferred language code: es, en, pt, zh, hi, ar (based on Cartagena visitor data + top 5 global) */
     private String language;
+
+    // ── Preferences Wizard Status ───────────────────────
+
+    /** Whether the user has seen the preferences wizard at least once (even if skipped) */
+    private Boolean preferencesSeen;
 }

@@ -43,8 +43,17 @@ export function Navbar({ activePage }) {
                                 boxShadow: '0 0 10px rgba(247, 127, 0, 0.4)', border: '2px solid rgba(255,255,255,0.1)',
                                 cursor: 'pointer', overflow: 'hidden'
                             }}>
+
                                 {user.profilePictureUrl ? (
-                                    <img src={user.profilePictureUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                    <img
+                                        src={user.profilePictureUrl}
+                                        alt="Avatar"
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                        onError={(e) => {
+                                            e.target.style.display = 'none';
+                                            e.target.parentElement.innerHTML = user.fullName ? user.fullName.charAt(0).toUpperCase() : 'U';
+                                        }}
+                                    />
                                 ) : (
                                     user.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'
                                 )}

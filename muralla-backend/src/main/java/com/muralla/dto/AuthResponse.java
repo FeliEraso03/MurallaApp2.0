@@ -1,5 +1,6 @@
 package com.muralla.dto;
 
+import com.muralla.model.UserPreference;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,4 +15,5 @@ public class AuthResponse {
     private String email;
     private String fullName;
     private String profilePictureUrl;
+    private UserPreference preferences;
 }

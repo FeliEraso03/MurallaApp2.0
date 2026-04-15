@@ -32,8 +32,8 @@ export function AuthProvider({ children }) {
     }
     const data = await resp.json();
     persist(data);
-    // Check if user has preferences saved before marking as done
-    if (data.preferences && data.preferences.language) {
+    // Check if user has completed the preferences wizard using preferencesSeen flag
+    if (data.preferences && data.preferences.preferencesSeen) {
       localStorage.setItem('muralla_prefs_done', '1');
     } else {
       localStorage.removeItem('muralla_prefs_done');
@@ -60,9 +60,24 @@ export function AuthProvider({ children }) {
   };
 
   // ── OAuth2 callback (Google) ──────────────────────
-  const persistOAuth = ({ token, email, fullName, profilePictureUrl }) => {
+  const persistOAuth = async ({ token, email, fullName, profilePictureUrl }) => {
     persist({ token, email, fullName, profilePictureUrl });
-    // Don't mark prefs_done — OAuth2CallbackPage decides that
+    // Check if user has completed the preferences wizard using preferencesSeen flag
+    try {
+      const resp = await fetch(`${API_BASE}/users/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data.preferences && data.preferences.preferencesSeen) {
+          localStorage.setItem('muralla_prefs_done', '1');
+        } else {
+          localStorage.removeItem('muralla_prefs_done');
+        }
+      }
+    } catch (err) {
+      console.error('Error checking preferences:', err);
+    }
   };
 
   // ── Update preferences ────────────────────────────

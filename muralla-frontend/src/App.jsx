@@ -538,10 +538,10 @@ function App() {
         <button className="topbar-menu-btn" onClick={() => setSidebarOpen(s => !s)} aria-label="menu">
           {isSidebarOpen ? <IconX /> : <IconMenu />}
         </button>
-        <div className="topbar-brand">
+        <Link to="/" className="topbar-brand" style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}>
           <span className="brand-name">Muralla App</span>
           <span className="brand-tag">2.0</span>
-        </div>
+        </Link>
         <div className="topbar-search">
           <IconSearch />
           <input type="text" placeholder={t('app.search_placeholder')} />
@@ -560,7 +560,15 @@ function App() {
               marginLeft: '10px', overflow: 'hidden'
             }}>
               {user.profilePictureUrl ? (
-                <img src={user.profilePictureUrl} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                <img
+                  src={user.profilePictureUrl}
+                  alt="Avatar"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                    e.target.parentElement.innerHTML = user.fullName ? user.fullName.charAt(0).toUpperCase() : 'U';
+                  }}
+                />
               ) : (
                 user.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'
               )}
