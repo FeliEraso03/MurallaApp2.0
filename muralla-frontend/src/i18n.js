@@ -83,8 +83,17 @@ export async function getTranslation(lang, key, params = {}) {
 
     // Interpolación de parámetros
     let result = value;
-    for (const [param, replacement] of Object.entries(params)) {
-        result = result.replace(new RegExp(`{{${param}}}`, 'g'), replacement);
+    
+    // Seguridad: Evitar que strings o arrays rompan la expresión regular
+    if (params && typeof params === 'object' && !Array.isArray(params)) {
+        for (const [param, replacement] of Object.entries(params)) {
+            try {
+                const regex = new RegExp(`{{${param}}}`, 'g');
+                result = result.replace(regex, replacement);
+            } catch (e) {
+                console.warn(`[i18n] Error interpolating key "${key}" with param "${param}":`, e);
+            }
+        }
     }
 
     return result;

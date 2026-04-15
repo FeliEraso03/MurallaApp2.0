@@ -315,7 +315,11 @@
         "connection_error": "خطأ في الاتصال.",
         "preferences_question": "هل تريد ضبط تفضيلات المسار والخوارزمية؟",
         "modify_preferences": "تعديل تفضيلات السفر",
-        "go_home": "الذهاب إلى الرئيسية",
+        "archetype_subtitle": "نمطك السياحي p-graph",
+        "time_lbl": "الوقت",
+        "company_lbl": "الرفقة",
+        "top_interests": "أهم الاهتمامات",
+        "go_home": "الذهاب للرئيسية",
         "logout": "تسجيل الخروج"
     },
     "preferences": {

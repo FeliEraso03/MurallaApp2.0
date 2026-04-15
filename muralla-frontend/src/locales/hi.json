@@ -314,9 +314,13 @@
         "error_connection": "कनेक्शन त्रुटि।",
         "connection_error": "कनेक्शन त्रुटि।",
         "preferences_question": "क्या आप अपनी मार्ग और एल्गोरिदम प्राथमिकताओं को समायोजित करना चाहते हैं?",
-        "modify_preferences": "यात्रा प्राथमिकताएं संशोधित करें",
+        "modify_preferences": "यात्रा प्राथमिकताएं बदलें",
+        "archetype_subtitle": "आपका p-graph यात्री मूलरूप",
+        "time_lbl": "समय",
+        "company_lbl": "साथी",
+        "top_interests": "शीर्ष रुचियां",
         "go_home": "होम पर जाएं",
-        "logout": "लॉग आउट"
+        "logout": "लॉगआउट"
     },
     "preferences": {
         "step_language": "भाषा",

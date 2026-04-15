@@ -314,7 +314,11 @@
         "connection_error": "连接错误。",
         "preferences_question": "想要调整您的路线和算法偏好吗？",
         "modify_preferences": "修改旅行偏好",
-        "go_home": "返回首页",
+        "archetype_subtitle": "您的 p-graph 旅行原型",
+        "time_lbl": "时间",
+        "company_lbl": "伴游",
+        "top_interests": "主要兴趣",
+        "go_home": "回到首页",
         "logout": "退出登录"
     },
     "preferences": {
@@ -397,6 +401,9 @@
         "loading_poi_labels": "加载POI标签中…",
         "map_engine": "地图引擎",
         "dark_mode": "深色",
+        "dark_mode_desc": "仅2D",
+        "light_mode": "浅色",
+        "light_mode_desc": "2D和3D",
         "profile_title": "转到我的个人资料/偏好设置",
         "logout": "退出登录",
         "login": "登录"

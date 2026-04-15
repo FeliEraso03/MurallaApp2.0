@@ -64,8 +64,22 @@ export function I18nProvider({ children }) {
     
     // Interpolación de parámetros
     let result = value;
-    for (const [param, replacement] of Object.entries(params)) {
-      result = result.replace(new RegExp(`{${param}}`, 'g'), replacement);
+    
+    // Diagnóstico y seguridad: Evitar que strings o arrays rompan la expresión regular
+    if (params && typeof params === 'object' && !Array.isArray(params)) {
+      for (const [param, replacement] of Object.entries(params)) {
+        try {
+          // El SyntaxError ocurren cuando param es un número solo (como "0" de un string)
+          // Protegemos la creación del RegExp
+          const regex = new RegExp(`{${param}}`, 'g');
+          result = result.replace(regex, replacement);
+        } catch (e) {
+          console.warn(`[I18n] Error interpolating key "${key}" with param "${param}":`, e);
+        }
+      }
+    } else if (params && typeof params !== 'object') {
+      // Si llegamos aquí con un string como segundo argumento, este es el culpable
+      console.warn(`[I18n] detected invalid call: t("${key}", "${params}"). Expected an object for params.`);
     }
     
     return result;

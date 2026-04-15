@@ -315,6 +315,10 @@
         "connection_error": "Error de conexión.",
         "preferences_question": "¿Quieres ajustar tus preferencias de ruta y algoritmos?",
         "modify_preferences": "Modificar Preferencias de Viaje",
+        "archetype_subtitle": "Tu arquetipo de viajero p-graph",
+        "time_lbl": "Tiempo",
+        "company_lbl": "Compañía",
+        "top_interests": "Top Intereses",
         "go_home": "Ir al Inicio",
         "logout": "Cerrar Sesión"
     },

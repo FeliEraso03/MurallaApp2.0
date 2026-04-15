@@ -54,6 +54,7 @@
         "ready_to_explore": "Ready to explore?",
         "ready_to_explore_desc": "Join the researchers and tourists who already use the power of science to tour the Heroic City.",
         "create_account": "Create free account",
+        "create_free_account": "Create free account",
         "skyline_alt": "Cartagena skyline",
         "about_project": "About the Project"
     },
@@ -172,7 +173,8 @@
         "error_password": "Password must be at least 6 characters.",
         "error_password_length": "Password must be at least 6 characters.",
         "error_confirm": "Passwords do not match.",
-        "error_account": "Error creating account."
+        "error_account": "Error creating account.",
+        "error_image_size": "Image must be smaller than 5MB."
     },
     "navbar": {
         "home": "Home",
@@ -313,6 +315,10 @@
         "connection_error": "Connection error.",
         "preferences_question": "Want to adjust your route and algorithm preferences?",
         "modify_preferences": "Modify Travel Preferences",
+        "archetype_subtitle": "Your p-graph traveler archetype",
+        "time_lbl": "Time",
+        "company_lbl": "Company",
+        "top_interests": "Top Interests",
         "go_home": "Go to Home",
         "logout": "Logout"
     },

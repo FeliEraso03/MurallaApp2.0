@@ -65,11 +65,11 @@ export const MapGraphEditor = ({
 
             const NODE_COLOR_EXPR = ['case',
                 ['==', ['coalesce', ['to-string', ['get', 'nodeType']], ''], 'algoSource'], '#00e5ff',
-                ['==', ['coalesce', ['to-string', ['get', 'nodeType']], ''], 'algoSink'],   '#ff6600',
-                ['==', ['coalesce', ['to-string', ['get', 'nodeType']], ''], 'selected'],   '#a78bfa',
-                ['==', ['coalesce', ['to-string', ['get', 'type']], ''], '1'], '#f59e0b',
-                ['==', ['coalesce', ['to-string', ['get', 'type']], ''], '3'], '#ef4444',
-                '#7c3aed'];
+                ['==', ['coalesce', ['to-string', ['get', 'nodeType']], ''], 'algoSink'],   '#ff6b6b',
+                ['==', ['coalesce', ['to-string', ['get', 'nodeType']], ''], 'selected'],   '#ffd43b',
+                ['==', ['coalesce', ['to-string', ['get', 'type']], ''], '1'], '#69db7c',
+                ['==', ['coalesce', ['to-string', ['get', 'type']], ''], '3'], '#ff922b',
+                '#9775fa'];
 
             // 3D Layers
             if (!map.getLayer('lyr-muralla-3d')) map.addLayer({ id: 'lyr-muralla-3d', type: 'fill-extrusion', source: 'src-muralla-3d', paint: { 'fill-extrusion-color': '#06b6d4', 'fill-extrusion-height': 1.0, 'fill-extrusion-opacity': graphOpacity } });

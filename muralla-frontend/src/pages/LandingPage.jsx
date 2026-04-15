@@ -48,7 +48,7 @@ export const LandingPage = () => {
             <section className="features-section">
                 <div className="container" style={{maxWidth: '1200px', margin: '0 auto'}}>
                     <h2 className="section-heading">{t('landing.ttdp_title')}</h2>
-                    <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4rem', alignItems: 'center'}}>
+                    <div className="landing-split-grid">
                         <div>
                             <p style={{fontSize: '1.2rem', color: 'var(--text-muted)', lineHeight: '1.8'}}>
                                 {t('landing.ttdp_description')}
@@ -105,7 +105,7 @@ export const LandingPage = () => {
 
             {/* Impact Section */}
             <section style={{padding: '6rem 2rem', maxWidth: '1200px', margin: '0 auto'}}>
-                <div style={{display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '4rem', alignItems: 'center'}}>
+                <div className="landing-impact-grid">
                     <div className="glass-container" style={{overflow: 'hidden', borderRadius: '30px'}}>
                         <img src="/assets/heat1.jpg" alt={t('landing.impact_alt')} style={{width: '100%', display: 'block'}} />
                     </div>

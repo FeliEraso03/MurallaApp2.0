@@ -28,7 +28,7 @@
     overflow: hidden;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 768px) {
     .auth-panel-left {
         display: flex;
         align-items: center;
@@ -152,7 +152,7 @@
     overflow-y: auto;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 768px) {
     .auth-panel-right {
         width: 480px;
         min-width: 480px;
@@ -1027,7 +1027,7 @@ select.auth-input:focus {
     display: none !important;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 768px) {
     .hidden-mobile {
         display: flex !important;
     }

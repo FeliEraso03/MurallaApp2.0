@@ -551,7 +551,7 @@ function App() {
           <span className="stat-chip">{edges.length} <small>{t('app.edges')}</small></span>
           
           {user && (
-            <Link to="/profile" title={t('app.my_traveler_profile')} style={{
+            <Link to="/profile" title={t('app.my_traveler_profile')} className="profile-link" style={{
               width: '36px', height: '36px', borderRadius: '50%',
               background: 'linear-gradient(135deg, var(--orange), #e55d02)',
               color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -907,6 +907,45 @@ function App() {
           )}
         </div>
       </div>
+
+      {/* MOBILE FLOATING ACTION BUTTONS */}
+      {isMobile && !isSidebarOpen && (
+        <div style={{
+          position: 'fixed',
+          bottom: '20px',
+          right: '20px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '10px',
+          zIndex: 40
+        }}>
+          {activeTab === 'editor' && (
+            <button 
+              className={`tool-card ${graphMode === 'ADD_NODE' ? 'active' : ''}`}
+              style={{ padding: '15px', borderRadius: '50%', boxShadow: '0 4px 15px rgba(0,0,0,0.5)', background: graphMode === 'ADD_NODE' ? 'rgba(247, 127, 0, 0.2)' : 'var(--navy-mid)' }}
+              onClick={() => setGraphMode(graphMode === 'ADD_NODE' ? 'IDLE' : 'ADD_NODE')}
+              title={t('app.add_node')}
+            >
+              <span className="tool-icon node-icon" style={{ margin: 0 }}><IconNode /></span>
+            </button>
+          )}
+          {activeTab === 'editor' && (
+            <button 
+               className={`algo-btn ${algorithmMode === 'DIJKSTRA' ? 'active' : ''}`}
+               style={{ padding: '15px', borderRadius: '50%', boxShadow: '0 4px 15px rgba(0,0,0,0.5)', background: algorithmMode === 'DIJKSTRA' ? 'var(--orange)' : 'var(--navy-mid)', color: algorithmMode === 'DIJKSTRA' ? '#000' : '#fff' }}
+               onClick={() => {
+                 setAlgorithmMode(algorithmMode === 'DIJKSTRA' ? 'NONE' : 'DIJKSTRA');
+                 setAlgorithmSelectedNodes([]);
+                 setRouteSolutions([]);
+                 setActiveSolution(0);
+               }}
+               title={t('app.dijkstra')}
+            >
+              <IconRoute />
+            </button>
+          )}
+        </div>
+      )}
 
       <ElementModal
         isOpen={modalConfig.isOpen}
