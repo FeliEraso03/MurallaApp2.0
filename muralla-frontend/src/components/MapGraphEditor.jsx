@@ -9,6 +9,7 @@ export const MapGraphEditor = ({
     map, nodes, edges, mode, onAddNode, onSelectNode, onSelectEdge,
     selectedNodeA, routeSolutions, activeSolution, showGrid, showDirection,
     algorithmSelectedNodes, is3DMode, buildingOpacity, graphOpacity, gridOpacity, mapStyle,
+    onSolveGraph,
 }) => {
     const layersReady = useRef(false);
     const [setupTick, setSetupTick] = useState(0);
@@ -172,7 +173,7 @@ export const MapGraphEditor = ({
         }
 
         // 3. Route (2D & 3D)
-        const sol = routeSolutions?.[activeSolution];
+        const sol = routeSolutions?.soluciones?.find(s => s.solucion === activeSolution);
         const routeLines = sol?.features?.filter(f => f.geometry.type === 'LineString') || [];
         map.getSource('src-route').setData({ type: 'FeatureCollection', features: routeLines });
 
@@ -208,13 +209,13 @@ export const MapGraphEditor = ({
         const visibility = {
             'lyr-nodes': !is3DMode ? 'visible' : 'none',
             'lyr-edges': !is3DMode ? 'visible' : 'none',
-            'lyr-route': (!is3DMode && routeSolutions?.length > 0) ? 'visible' : 'none',
+            'lyr-route': (!is3DMode && routeSolutions?.soluciones?.length > 0) ? 'visible' : 'none',
             'lyr-arrows': showDirection ? 'visible' : 'none',
             'lyr-grid': showGrid ? 'visible' : 'none',
             'lyr-nodes-3d': (is3DMode && mapStyle === 'https://tiles.openfreemap.org/styles/liberty') ? 'visible' : 'none',
             'lyr-muralla-3d': (is3DMode && mapStyle === 'https://tiles.openfreemap.org/styles/liberty') ? 'visible' : 'none',
             'lyr-buildings-3d': is3DMode ? 'visible' : 'none',
-            'lyr-route-3d': (is3DMode && routeSolutions?.length > 0) ? 'visible' : 'none',
+            'lyr-route-3d': (is3DMode && routeSolutions?.soluciones?.length > 0) ? 'visible' : 'none',
         };
 
         Object.entries(visibility).forEach(([id, val]) => { if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', val); });

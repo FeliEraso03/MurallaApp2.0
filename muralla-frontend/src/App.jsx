@@ -4,7 +4,9 @@ import 'maplibre-gl/dist/maplibre-gl.css';
 import { MapGraphEditor } from './components/MapGraphEditor';
 import { MapLabels } from './components/MapLabels';
 import { ElementModal } from './components/ElementModal';
+import { RouteSolutionSelector } from './components/RouteSolutionSelector';
 import { parseResolveGraphOutput } from './utils/Wdg2PnsParser';
+import { parseSolverOutput } from './utils/wdg2pns';
 import { useAuth } from './utils/authContext';
 import { useI18n } from './contexts/I18nContext';
 import { Link } from 'react-router-dom';
@@ -295,6 +297,31 @@ function App() {
       data: { ...edge, idx: edgeIdx },
       editMode: true,
     });
+  };
+
+  const handleSolveGraph = async (geojson) => {
+    try {
+      const response = await fetch('http://localhost:8081/api/solver/solve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(geojson)
+      });
+      
+      const result = await response.json();
+      console.log('Resultado del solver:', result);
+      
+      if (result.output) {
+        const solutions = parseSolverOutput(result.output, geojson);
+        console.log('Soluciones procesadas:', solutions);
+        setRouteSolutions(solutions);
+        if (solutions.soluciones && solutions.soluciones.length > 0) {
+          console.log('Estableciendo solución activa:', solutions.soluciones[0].solucion);
+          setActiveSolution(solutions.soluciones[0].solucion);
+        }
+      }
+    } catch (error) {
+      console.error('Error al llamar al solver:', error);
+    }
   };
 
   const handleModalSave = (formData) => {
@@ -611,15 +638,18 @@ function App() {
                 </button>
               </div>
 
-              {routeSolutions.length > 0 && (
+              {routeSolutions?.soluciones && routeSolutions.soluciones.length > 0 && (
                 <div className="sidebar-section">
-                  <h3 className="section-title">{t('app.routes_found')} <span className="badge">{routeSolutions.length}</span></h3>
+                  <h3 className="section-title">{t('app.routes_found')} <span className="badge">{routeSolutions.soluciones.length}</span></h3>
                   <div className="solutions-list">
-                    {routeSolutions.map((sol, idx) => (
-                      <button key={idx} className={`solution-card ${activeSolution === idx ? 'active' : ''}`} onClick={() => setActiveSolution(idx)}>
+                    {routeSolutions.soluciones.map((sol, idx) => (
+                      <button key={idx} className={`solution-card ${activeSolution === sol.solucion ? 'active' : ''}`} onClick={() => {
+                        console.log('Clic en solución:', sol.solucion);
+                        setActiveSolution(sol.solucion);
+                      }}>
                         <div className="sol-header">
                           <span className="sol-number">{t('app.route')} {sol.solucion || idx + 1}</span>
-                          {activeSolution === idx && <span className="sol-active-badge">{t('app.active')}</span>}
+                          {activeSolution === sol.solucion && <span className="sol-active-badge">{t('app.active')}</span>}
                         </div>
                         <div className="sol-metrics" style={{ gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
                           <div className="metric">
@@ -804,6 +834,47 @@ function App() {
                   >
                     {t('app.ford_fulkerson')}
                   </button>
+                  <button 
+                    className="algo-btn"
+                    onClick={() => {
+                        if (nodes.length === 0) {
+                            alert('No hay nodos en el grafo. Agrega nodos primero.');
+                            return;
+                        }
+                        console.log('Total de nodos:', nodes.length);
+                        console.log('Total de aristas antes de filter:', edges.length);
+                        const validEdges = edges.filter(e => {
+                            const startNode = nodes.find(n => n.id === e.startNodeId);
+                            const endNode = nodes.find(n => n.id === e.endNodeId);
+                            return startNode && endNode;
+                        });
+                        console.log('Total de aristas después de filter:', validEdges.length);
+                        const nodeIndexMap = new Map();
+                        nodes.forEach((n, index) => nodeIndexMap.set(n.id, index + 1));
+                        const geojson = {
+                            type: 'FeatureCollection',
+                            features: nodes.map((n, index) => ({
+                                type: 'Feature',
+                                geometry: { type: 'Point', coordinates: [n.lng, n.lat] },
+                                properties: { id: `Node${index + 1}`, type: n.type }
+                            })).concat(validEdges.map(e => {
+                                const startNode = nodes.find(n => n.id === e.startNodeId);
+                                const endNode = nodes.find(n => n.id === e.endNodeId);
+                                const startIndex = nodeIndexMap.get(e.startNodeId);
+                                const endIndex = nodeIndexMap.get(e.endNodeId);
+                                return {
+                                    type: 'Feature',
+                                    geometry: { type: 'LineString', coordinates: [[startNode.lng, startNode.lat], [endNode.lng, endNode.lat]] },
+                                    properties: { startNodeId: `Node${startIndex}`, endNodeId: `Node${endIndex}`, distance: e.weight || e.distance || 1 }
+                                };
+                            }))
+                        };
+                        console.log('GeoJSON enviado:', JSON.stringify(geojson, null, 2));
+                        handleSolveGraph(geojson);
+                    }}
+                  >
+                    Generar Rutas P-Graph
+                  </button>
                 </div>
                 {algorithmMode !== 'NONE' && (
                   <div className="selection-info">
@@ -896,7 +967,18 @@ function App() {
                graphOpacity={graphOpacity}
                gridOpacity={gridOpacity}
                mapStyle={mapStyle}
+               onSolveGraph={handleSolveGraph}
              />
+          )}
+
+          {routeSolutions?.soluciones && routeSolutions.soluciones.length > 0 && (
+            <div style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 10, background: 'rgba(0,0,0,0.8)', padding: '15px', borderRadius: '8px' }}>
+              <RouteSolutionSelector
+                solutions={routeSolutions.soluciones}
+                activeSolution={activeSolution}
+                onSelectSolution={setActiveSolution}
+              />
+            </div>
           )}
 
           {mapInstance && (
