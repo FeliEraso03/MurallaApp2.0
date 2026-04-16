@@ -48,5 +48,17 @@ services:
     depends_on:
       - backend
 
+  solver:
+    build:
+      context: ./muralla-solver
+    container_name: muralla-solver
+    ports:
+      - "3000:3000"
+    environment:
+      - COPY_DIR=/app/copy
+      - JAR_FILE=/app/WDG2PNSv2.jar
+      - EXE_FILE=/app/pgraph_solver.exe
+      - PORT=3000
+
 volumes:
   pgdata:
