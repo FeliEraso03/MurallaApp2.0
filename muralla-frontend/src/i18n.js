@@ -3,7 +3,7 @@
 
 const translationsCache = new Map();
 
-const SUPPORTED_LANGUAGES = ['es', 'en', 'pt', 'zh', 'hi', 'ar', 'de', 'ru'];
+const SUPPORTED_LANGUAGES = ['es', 'en', 'pt', 'zh', 'hi', 'ar', 'de', 'ru', 'fr', 'it', 'ja', 'ko', 'tr', 'id', 'nl'];
 
 const LANGUAGE_INFO = {
     es: { name: 'Español', flag: '🇪🇸', rtl: false },
@@ -14,6 +14,13 @@ const LANGUAGE_INFO = {
     ar: { name: 'العربية', flag: '🇸🇦', rtl: true },
     de: { name: 'Deutsch', flag: '🇩🇪', rtl: false },
     ru: { name: 'Русский', flag: '🇷🇺', rtl: false },
+    fr: { name: 'Français', flag: '🇫🇷', rtl: false },
+    it: { name: 'Italiano', flag: '🇮🇹', rtl: false },
+    ja: { name: '日本語', flag: '🇯🇵', rtl: false },
+    ko: { name: '한국어', flag: '🇰🇷', rtl: false },
+    tr: { name: 'Türkçe', flag: '🇹🇷', rtl: false },
+    id: { name: 'Bahasa Indonesia', flag: '🇮🇩', rtl: false },
+    nl: { name: 'Nederlands', flag: '🇳🇱', rtl: false },
 };
 
 /**
@@ -83,7 +90,7 @@ export async function getTranslation(lang, key, params = {}) {
 
     // Interpolación de parámetros
     let result = value;
-    
+
     // Seguridad: Evitar que strings o arrays rompan la expresión regular
     if (params && typeof params === 'object' && !Array.isArray(params)) {
         for (const [param, replacement] of Object.entries(params)) {
