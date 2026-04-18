@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cargar GeoJSON</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h1>Cargar un Archivo GeoJSON</h1>
+    <input type="file" id="geojsonInput">
+    <button onclick="cargarGeoJSON()">Subir GeoJSON</button>
+    <div id="message"></div>
+
+    <script>
+        function cargarGeoJSON() {
+            const fileInput = document.getElementById('geojsonInput');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('Por favor, seleccione un archivo GeoJSON.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const geojsonData = JSON.parse(event.target.result);
+
+                fetch('/upload-geojson', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(geojsonData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    mostrarMensaje(data.message, 'success');
+                    console.log('Archivos generados:', data.files);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    mostrarMensaje('Error al subir el archivo GeoJSON.', 'error');
+                });
+            };
+            reader.readAsText(file);
+        }
+
+        function mostrarMensaje(mensaje, tipo) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = mensaje;
+            messageDiv.style.color = tipo === 'success' ? 'green' : 'red';
+        }
+    </script>
+</body>
+</html>
+
+
+
+
