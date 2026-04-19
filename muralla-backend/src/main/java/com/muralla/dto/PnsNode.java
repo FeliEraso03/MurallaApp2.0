@@ -1,4 +1,4 @@
-package com.muralla.service.pgraph;
+package com.muralla.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

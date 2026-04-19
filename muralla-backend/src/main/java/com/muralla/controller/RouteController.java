@@ -1,7 +1,7 @@
 package com.muralla.controller;
 
-import com.muralla.service.pgraph.GraphRequest;
-import com.muralla.service.pgraph.PGraphAlgorithmService;
+import com.muralla.dto.GraphRequest;
+import com.muralla.service.PGraphAlgorithmService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;

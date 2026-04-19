@@ -1,4 +1,8 @@
-package com.muralla.service.pgraph;
+package com.muralla.service;
+
+import com.muralla.dto.GraphRequest;
+import com.muralla.dto.PnsNode;
+import com.muralla.dto.PnsEdge;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

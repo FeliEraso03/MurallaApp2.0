@@ -434,27 +434,27 @@ export function UserProfilePage() {
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "20px",
-              marginBottom: "30px",
+              gap: "15px",
+              marginBottom: "20px",
             }}
           >
             <div
               style={{
-                width: "100px",
-                height: "100px",
+                width: "80px",
+                height: "80px",
                 borderRadius: "50%",
                 background: profilePicture
                   ? `url(${profilePicture}) center/cover no-repeat`
                   : "rgba(255,255,255,0.1)",
-                border: "3px solid var(--orange)",
+                border: "2px solid var(--orange)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                boxShadow: "0 8px 16px rgba(0,0,0,0.3)",
+                boxShadow: "0 6px 12px rgba(0,0,0,0.3)",
                 flexShrink: 0,
               }}
             >
-              {!profilePicture && <User size={40} color="var(--orange)" />}
+              {!profilePicture && <User size={32} color="var(--orange)" />}
             </div>
             <div>
               <h2 className="auth-form-title" style={{ marginBottom: "4px" }}>
@@ -472,11 +472,11 @@ export function UserProfilePage() {
           </div>
 
           {/* Selector de Idioma Rápido */}
-          <div className="auth-field" style={{ marginBottom: '25px', padding: '20px', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.08)' }}>
-            <label className="auth-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '15px', color: 'var(--orange)', fontSize: '0.8rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1.5px' }}>
-              <Globe size={16} /> {t('preferences.language')}
+          <div className="auth-field" style={{ marginBottom: '20px', padding: '15px', background: 'rgba(255,255,255,0.02)', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.06)' }}>
+            <label className="auth-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px', color: 'var(--orange)', fontSize: '0.75rem', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px' }}>
+              <Globe size={14} /> {t('preferences.language')}
             </label>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(135px, 1fr))', gap: '10px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(110px, 1fr))', gap: '8px' }}>
               {getSupportedLanguages().map((lang) => (
                 <button
                   key={lang.code}
@@ -489,15 +489,15 @@ export function UserProfilePage() {
                   style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '10px',
-                    padding: '10px 14px',
-                    borderRadius: '10px',
-                    border: `1px solid ${language === lang.code ? 'var(--orange)' : 'rgba(255,255,255,0.1)'}`,
-                    background: language === lang.code ? 'rgba(247, 127, 0, 0.12)' : 'rgba(255,255,255,0.02)',
-                    color: language === lang.code ? 'var(--orange)' : 'rgba(255,255,255,0.7)',
+                    gap: '8px',
+                    padding: '8px 10px',
+                    borderRadius: '8px',
+                    border: `1px solid ${language === lang.code ? 'var(--orange)' : 'rgba(255,255,255,0.08)'}`,
+                    background: language === lang.code ? 'rgba(247, 127, 0, 0.1)' : 'rgba(255,255,255,0.01)',
+                    color: language === lang.code ? 'var(--orange)' : 'rgba(255,255,255,0.6)',
                     cursor: 'pointer',
-                    fontSize: '0.92rem',
-                    transition: 'all 0.3s ease',
+                    fontSize: '0.85rem',
+                    transition: 'all 0.2s ease',
                     fontWeight: language === lang.code ? '600' : 'normal'
                   }}
                 >

@@ -33,9 +33,11 @@ export const ElementModal = ({ isOpen, type, initialData, editMode, onSave, onCa
 
     const handleSave = () => onSave(formData);
 
-    const title = editMode
-        ? (type === 'NODE' ? `Editar ${initialData?.id || 'Nodo'}` : `Editar Arista ${initialData?.startNodeId ?? ''} → ${initialData?.endNodeId ?? ''}`)
-        : (type === 'NODE' ? 'Nuevo Nodo' : 'Nueva Conexión');
+    const title = type === 'CONFIRM' 
+        ? (formData.title || 'Confirmación')
+        : editMode
+            ? (type === 'NODE' ? `Editar ${initialData?.id || 'Nodo'}` : `Editar Arista ${initialData?.startNodeId ?? ''} → ${initialData?.endNodeId ?? ''}`)
+            : (type === 'NODE' ? 'Nuevo Nodo' : 'Nueva Conexión');
 
     return (
         <div className="modal-overlay">
@@ -43,6 +45,12 @@ export const ElementModal = ({ isOpen, type, initialData, editMode, onSave, onCa
                 <h3>{title}</h3>
                 
                 <div className="modal-form">
+                    {type === 'CONFIRM' && (
+                        <div style={{ padding: '10px 0', fontSize: '1.1rem', color: 'rgba(255,255,255,0.9)', textAlign: 'center' }}>
+                            {formData.message || '¿Deseas confirmar esta acción?'}
+                        </div>
+                    )}
+
                     {type === 'NODE' && (
                         <>
                             <div className="form-group">
@@ -105,7 +113,9 @@ export const ElementModal = ({ isOpen, type, initialData, editMode, onSave, onCa
                     )}
                     <div className="modal-actions-right">
                         <button className="btn-cancel" onClick={onCancel}>Cancelar</button>
-                        <button className="btn-primary" onClick={handleSave}>Guardar</button>
+                        <button className="btn-primary" onClick={handleSave}>
+                            {type === 'CONFIRM' ? 'Confirmar' : 'Guardar'}
+                        </button>
                     </div>
                 </div>
             </div>

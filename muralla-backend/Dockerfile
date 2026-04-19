@@ -3,11 +3,8 @@ FROM maven:3.9.6-eclipse-temurin-21-alpine AS builder
 
 WORKDIR /app
 
-# Cache dependencies first (only re-runs if pom.xml changes)
-COPY pom.xml .
-RUN mvn dependency:go-offline -q
-
 # Copy source and build
+COPY pom.xml .
 COPY src ./src
 RUN mvn package -DskipTests -q
 

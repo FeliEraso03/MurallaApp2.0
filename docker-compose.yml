@@ -2,7 +2,7 @@
 
 services:
   db:
-    image: postgres:16-alpine
+    image: postgis/postgis:16-3.4
     container_name: muralla-db
     environment:
       POSTGRES_DB: muralladb

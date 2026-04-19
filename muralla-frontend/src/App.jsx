@@ -5,11 +5,13 @@ import { MapGraphEditor } from './components/MapGraphEditor';
 import { MapLabels } from './components/MapLabels';
 import { ElementModal } from './components/ElementModal';
 import { RouteSolutionSelector } from './components/RouteSolutionSelector';
+import { GraphManager } from './components/GraphManager';
 import { parseResolveGraphOutput } from './utils/Wdg2PnsParser';
 import { parseSolverOutput } from './utils/wdg2pns';
 import { useAuth } from './utils/authContext';
 import { useI18n } from './contexts/I18nContext';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, Outlet } from 'react-router-dom';
+import { useNotification } from './contexts/NotificationContext';
 import './App.css';
 
 const CENTRO_HISTORICO = { lat: 10.4231, lng: -75.5494 };
@@ -79,6 +81,13 @@ const IconEdit = () => (
     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
   </svg>
 );
+const IconDatabase = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+    <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+    <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+  </svg>
+);
 
 function App() {
   const mapContainer = useRef(null);
@@ -87,11 +96,23 @@ function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [activeTab, setActiveTab] = useState('planner');
   
-  const { user } = useAuth();
+  const { user, token } = useAuth();
   const { t } = useI18n();
+  const { showNotification } = useNotification();
+  const location = useLocation();
+  const isProfileOpen = location.pathname.includes('/profile');
 
-  const [nodes, setNodes] = useState([]);
-  const [edges, setEdges] = useState([]);
+  const [nodes, setNodes] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('muralla_nodes')) || []; } catch { return []; }
+  });
+  const [edges, setEdges] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('muralla_edges')) || []; } catch { return []; }
+  });
+
+  useEffect(() => {
+    localStorage.setItem('muralla_nodes', JSON.stringify(nodes));
+    localStorage.setItem('muralla_edges', JSON.stringify(edges));
+  }, [nodes, edges]);
   const [graphMode, setGraphMode] = useState('IDLE');
   const [selectedNodeA, setSelectedNodeA] = useState(null);
   const [modalConfig, setModalConfig] = useState({ isOpen: false, type: null, data: null });
@@ -100,7 +121,7 @@ function App() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [showGrid, setShowGrid] = useState(false);
   const [isGridLoading, setIsGridLoading] = useState(false);
-  const [showDirection, setShowDirection] = useState(false);
+  const [showDirection, setShowDirection] = useState(true);
   const [isDirected, setIsDirected] = useState(false);
   const [algorithmMode, setAlgorithmMode] = useState('NONE'); // 'NONE' | 'DIJKSTRA' | 'FORD_FULKERSON'
   const [algorithmSelectedNodes, setAlgorithmSelectedNodes] = useState([]);
@@ -301,9 +322,12 @@ function App() {
 
   const handleSolveGraph = async (geojson) => {
     try {
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       const response = await fetch('http://localhost:8081/api/solver/solve', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(geojson)
       });
       
@@ -325,6 +349,21 @@ function App() {
   };
 
   const handleModalSave = (formData) => {
+    if (modalConfig.type === 'CONFIRM') {
+      if (formData.action === 'CLEAR_MAP') {
+        setNodes([]);
+        setEdges([]);
+        setSelectedNodeA(null);
+        setGraphMode('IDLE');
+        setAlgorithmSelectedNodes([]);
+        setRouteSolutions([]);
+        setActiveSolution(0);
+        showNotification(t('app.map_cleared') || 'Mapa limpiado', 'info');
+      }
+      setModalConfig({ ...modalConfig, isOpen: false });
+      return;
+    }
+
     if (modalConfig.editMode) {
       // ── EDIT existing element ──
       if (modalConfig.type === 'NODE') {
@@ -379,7 +418,7 @@ function App() {
   const handleModalCancel = () => setModalConfig({ isOpen: false, type: null, data: null, editMode: false });
 
   const handleExportGeoJSON = () => {
-    if (nodes.length === 0) { alert('No hay datos para exportar.'); return; }
+    if (nodes.length === 0) { showNotification('No hay datos para exportar.', 'error'); return; }
     
     const geojson = {
       type: "FeatureCollection",
@@ -426,11 +465,59 @@ function App() {
     URL.revokeObjectURL(url);
   };
 
+  const generatePGraphRoutes = async () => {
+    if (nodes.length === 0) {
+      showNotification(t('app.error_min_nodes') || 'No hay nodos en el grafo.', 'error');
+      return;
+    }
+    setIsGenerating(true);
+    try {
+      const validEdges = edges.filter(e => {
+        const startNode = nodes.find(n => n.id === e.startNodeId);
+        const endNode = nodes.find(n => n.id === e.endNodeId);
+        return startNode && endNode;
+      });
+      const nodeIndexMap = new Map();
+      nodes.forEach((n, index) => nodeIndexMap.set(n.id, index + 1));
+      const geojson = {
+        type: 'FeatureCollection',
+        features: nodes.map((n, index) => ({
+            type: 'Feature',
+            geometry: { type: 'Point', coordinates: [n.lng, n.lat] },
+            properties: { id: `Node${index + 1}`, type: n.type }
+        })).concat(validEdges.map(e => {
+            const startNode = nodes.find(n => n.id === e.startNodeId);
+            const endNode = nodes.find(n => n.id === e.endNodeId);
+            const startIndex = nodeIndexMap.get(e.startNodeId);
+            const endIndex = nodeIndexMap.get(e.endNodeId);
+            return {
+                type: 'Feature',
+                geometry: { type: 'LineString', coordinates: [[startNode.lng, startNode.lat], [endNode.lng, endNode.lat]] },
+                properties: { startNodeId: `Node${startIndex}`, endNodeId: `Node${endIndex}`, distance: e.weight || e.distance || 1 }
+            };
+        }))
+      };
+      await handleSolveGraph(geojson);
+    } catch (e) {
+      console.error(e);
+      showNotification('Error: ' + e.message, 'error');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   const generateRoutes = async () => {
-    if (nodes.length < 2) { alert(t('app.error_min_nodes')); return; }
-    if (algorithmMode !== 'NONE' && algorithmMode !== 'RESOLVE_GRAPH' && algorithmSelectedNodes.length < 2) { alert(t('app.select_origin_destination')); return; }
+    if (nodes.length === 0) {
+      showNotification(t('app.error_min_nodes') || 'No hay nodos en el grafo.', 'error');
+      return;
+    }
+    if (algorithmMode !== 'NONE' && algorithmMode !== 'RESOLVE_GRAPH' && algorithmSelectedNodes.length < 2) {
+      showNotification(t('app.select_origin_destination'), 'warning');
+      return;
+    }
 
     const headers = { 'Content-Type': 'application/json' };
+    if (token) headers['Authorization'] = `Bearer ${token}`;
 
     setIsGenerating(true);
     try {
@@ -462,7 +549,7 @@ function App() {
         const stringOutput = typeof responseData === 'string' ? responseData : responseData.output || JSON.stringify(responseData);
         const soluciones = parseResolveGraphOutput(stringOutput, nodes, edges);
         
-        if (soluciones.length === 0) alert('No se encontraron soluciones.');
+        if (soluciones.length === 0) showNotification('No se encontraron soluciones.', 'info');
         setRouteSolutions(soluciones);
         setActiveSolution(0);
         return;
@@ -481,13 +568,22 @@ function App() {
         headers,
         body: JSON.stringify(payload)
       });
-      if (!resp.ok) throw new Error(`Error ${resp.status}`);
-      const solutions = await resp.json();
-      setRouteSolutions(solutions);
-      setActiveSolution(0);
+      if (!resp.ok) throw new Error(`Error HTTP: ${resp.status}`);
+      const data = await resp.json();
+
+      let sol = [];
+      // Backend returns a List<Object>, could be FeatureCollections
+      if (Array.isArray(data)) sol = data; 
+      else if (data.soluciones) sol = data.soluciones;
+      else if (data.type === 'FeatureCollection') sol = [data];
+
+      if (sol.length === 0) showNotification('No se encontraron rutas.', 'info');
+      // Tag solution with algorithm type so the map can orient arrows correctly
+      setRouteSolutions({ soluciones: sol, algorithm: algorithmMode });
+      setActiveSolution(sol[0]?.solucion || 0);
     } catch (e) {
       console.error(e);
-      alert('Error conectando con el backend en puerto :8081');
+      showNotification('Error: ' + e.message, 'error');
     } finally {
       setIsGenerating(false);
     }
@@ -522,7 +618,8 @@ function App() {
         });
         setNodes(newNodes); setEdges(newEdges); setGraphMode('IDLE');
         e.target.value = null; 
-      } catch (err) { alert('Error parseando el archivo JSON/GeoJSON. '+err.message); }
+        showNotification('Grafo importado con éxito', 'success');
+      } catch (err) { showNotification('Error parseando el archivo JSON/GeoJSON. '+err.message, 'error'); }
     };
     reader.readAsText(file);
   };
@@ -551,7 +648,22 @@ function App() {
         });
       });
       setNodes(newNodes); setEdges(newEdges); setGraphMode('IDLE');
-    } catch (e) { alert(t('app.error_loading_graph')); }
+      showNotification('Grafo de Cartagena cargado', 'success');
+    } catch (e) { showNotification(t('app.error_loading_graph'), 'error'); }
+  };
+
+  const handleClearMap = () => {
+    if (nodes.length === 0 && edges.length === 0) return;
+    setModalConfig({
+        isOpen: true,
+        type: 'CONFIRM',
+        data: { 
+            title: t('app.clear_map') || 'Limpiar Mapa',
+            message: t('app.clear_map_confirm') || '¿Estás seguro de que deseas borrar todo el mapa?',
+            action: 'CLEAR_MAP' 
+        },
+        editMode: false
+    });
   };
 
   const modeLabel = graphMode === 'ADD_NODE' ? t('app.click_add_node')
@@ -561,6 +673,18 @@ function App() {
 
   return (
     <div className="app-main">
+      {/* Profile Overlay */}
+      <div style={{
+        display: isProfileOpen ? 'block' : 'none',
+        position: 'absolute',
+        top: 0, left: 0, right: 0, bottom: 0,
+        zIndex: 9999,
+        background: 'var(--navy)',
+        overflowY: 'auto'
+      }}>
+        <Outlet />
+      </div>
+
       <header className="topbar">
         <button className="topbar-menu-btn" onClick={() => setSidebarOpen(s => !s)} aria-label="menu">
           {isSidebarOpen ? <IconX /> : <IconMenu />}
@@ -578,7 +702,7 @@ function App() {
           <span className="stat-chip">{edges.length} <small>{t('app.edges')}</small></span>
           
           {user && (
-            <Link to="/profile" title={t('app.my_traveler_profile')} className="profile-link" style={{
+            <Link to="/editor/profile" title={t('app.my_traveler_profile')} className="profile-link" style={{
               width: '36px', height: '36px', borderRadius: '50%',
               background: 'linear-gradient(135deg, var(--orange), #e55d02)',
               color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -613,6 +737,9 @@ function App() {
             <button className={`tab-btn ${activeTab === 'editor' ? 'active' : ''}`} onClick={() => setActiveTab('editor')}>
               <IconEdit /> {t('app.editor')}
             </button>
+            <button className={`tab-btn ${activeTab === 'graphs' ? 'active' : ''}`} onClick={() => setActiveTab('graphs')}>
+              <IconDatabase /> {t('app.my_graphs')}
+            </button>
           </div>
 
           {activeTab === 'planner' && (
@@ -632,16 +759,16 @@ function App() {
                     <option>{t('app.beach_tourism')}</option>
                   </select>
                 </div>
-                <button className="cta-btn" onClick={generateRoutes} disabled={isGenerating}>
+                <button className="cta-btn primary" onClick={generatePGraphRoutes} disabled={isGenerating}>
                   <IconRoute />
-                  {isGenerating ? t('app.calculating_routes') : t('app.generate_routes')}
+                  {isGenerating ? t('app.calculating_routes') : "Generar Rutas P-Graph"}
                 </button>
               </div>
 
               {routeSolutions?.soluciones && routeSolutions.soluciones.length > 0 && (
                 <div className="sidebar-section">
                   <h3 className="section-title">{t('app.routes_found')} <span className="badge">{routeSolutions.soluciones.length}</span></h3>
-                  <div className="solutions-list">
+                  <div className="solutions-list" style={{ marginTop: '10px' }}>
                     {routeSolutions.soluciones.map((sol, idx) => (
                       <button key={idx} className={`solution-card ${activeSolution === sol.solucion ? 'active' : ''}`} onClick={() => {
                         console.log('Clic en solución:', sol.solucion);
@@ -651,14 +778,14 @@ function App() {
                           <span className="sol-number">{t('app.route')} {sol.solucion || idx + 1}</span>
                           {activeSolution === sol.solucion && <span className="sol-active-badge">{t('app.active')}</span>}
                         </div>
-                        <div className="sol-metrics" style={{ gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+                        <div className="sol-metrics" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
                           <div className="metric">
                             <span className="metric-label">{t('app.dist')}</span>
-                            <span className="metric-val">{(sol.totalWeight || 0).toFixed(0)}m</span>
+                            <span className="metric-val">{(sol.totalWeight || 0).toFixed(0)}</span>
                           </div>
                           <div className="metric">
-                            <span className="metric-label">{t('app.time')}</span>
-                            <span className="metric-val">{(sol.totalTime || 0).toFixed(0)} min</span>
+                            <span className="metric-label">Max Flow</span>
+                            <span className="metric-val">{(sol.maxFlow || sol.features.filter(f => f.geometry.type === 'Point' || f.geometry.type === 'circle').length).toFixed(0)}</span>
                           </div>
                           <div className="metric">
                             <span className="metric-label">{t('app.nodes_label')}</span>
@@ -834,47 +961,6 @@ function App() {
                   >
                     {t('app.ford_fulkerson')}
                   </button>
-                  <button 
-                    className="algo-btn"
-                    onClick={() => {
-                        if (nodes.length === 0) {
-                            alert('No hay nodos en el grafo. Agrega nodos primero.');
-                            return;
-                        }
-                        console.log('Total de nodos:', nodes.length);
-                        console.log('Total de aristas antes de filter:', edges.length);
-                        const validEdges = edges.filter(e => {
-                            const startNode = nodes.find(n => n.id === e.startNodeId);
-                            const endNode = nodes.find(n => n.id === e.endNodeId);
-                            return startNode && endNode;
-                        });
-                        console.log('Total de aristas después de filter:', validEdges.length);
-                        const nodeIndexMap = new Map();
-                        nodes.forEach((n, index) => nodeIndexMap.set(n.id, index + 1));
-                        const geojson = {
-                            type: 'FeatureCollection',
-                            features: nodes.map((n, index) => ({
-                                type: 'Feature',
-                                geometry: { type: 'Point', coordinates: [n.lng, n.lat] },
-                                properties: { id: `Node${index + 1}`, type: n.type }
-                            })).concat(validEdges.map(e => {
-                                const startNode = nodes.find(n => n.id === e.startNodeId);
-                                const endNode = nodes.find(n => n.id === e.endNodeId);
-                                const startIndex = nodeIndexMap.get(e.startNodeId);
-                                const endIndex = nodeIndexMap.get(e.endNodeId);
-                                return {
-                                    type: 'Feature',
-                                    geometry: { type: 'LineString', coordinates: [[startNode.lng, startNode.lat], [endNode.lng, endNode.lat]] },
-                                    properties: { startNodeId: `Node${startIndex}`, endNodeId: `Node${endIndex}`, distance: e.weight || e.distance || 1 }
-                                };
-                            }))
-                        };
-                        console.log('GeoJSON enviado:', JSON.stringify(geojson, null, 2));
-                        handleSolveGraph(geojson);
-                    }}
-                  >
-                    Generar Rutas P-Graph
-                  </button>
                 </div>
                 {algorithmMode !== 'NONE' && (
                   <div className="selection-info">
@@ -888,9 +974,23 @@ function App() {
                     </div>
                     
                     {algorithmSelectedNodes.length === 2 && (
-                        <button className="cta-btn primary" style={{marginTop: '1rem'}} onClick={generateRoutes}>
-                            {t('app.calculate', { algorithm: algorithmMode === 'DIJKSTRA' ? 'Dijkstra' : 'Max Flow' })}
-                        </button>
+                        <div style={{ display: 'flex', gap: '8px', marginTop: '1rem' }}>
+                            <button className="cta-btn primary" style={{ flex: 2 }} onClick={generateRoutes}>
+                                {t('app.calculate', { algorithm: algorithmMode === 'DIJKSTRA' ? 'Dijkstra' : 'Max Flow' })}
+                            </button>
+                            <button 
+                                className="cta-btn secondary" 
+                                style={{ flex: 1, background: 'rgba(255,255,255,0.05)', borderRadius: '12px' }} 
+                                onClick={() => {
+                                    setAlgorithmSelectedNodes([]);
+                                    setRouteSolutions([]);
+                                    setActiveSolution(0);
+                                }}
+                                title={t('app.clear_results') || 'Limpiar'}
+                            >
+                                <IconTrash size={18} />
+                            </button>
+                        </div>
                     )}
                   </div>
                 )}
@@ -914,6 +1014,20 @@ function App() {
                   }}><IconTrash /> {t('app.clear_all')}</button>
                 </div>
               </details>
+            </div>
+          )}
+
+          {activeTab === 'graphs' && (
+            <div className="tab-content" style={{ padding: '0 15px' }}>
+              <div className="sidebar-section">
+                <h3 className="section-title">{t('app.my_graphs') || 'Mis Grafos'}</h3>
+                <GraphManager 
+                  nodes={nodes} 
+                  edges={edges} 
+                  setNodes={setNodes} 
+                  setEdges={setEdges} 
+                />
+              </div>
             </div>
           )}
         </aside>
@@ -971,15 +1085,36 @@ function App() {
              />
           )}
 
-          {routeSolutions?.soluciones && routeSolutions.soluciones.length > 0 && (
-            <div style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 10, background: 'rgba(0,0,0,0.8)', padding: '15px', borderRadius: '8px' }}>
-              <RouteSolutionSelector
-                solutions={routeSolutions.soluciones}
-                activeSolution={activeSolution}
-                onSelectSolution={setActiveSolution}
-              />
-            </div>
-          )}
+
+
+          {/* Floating Clear Map Button */}
+          <button 
+            onClick={handleClearMap}
+            style={{
+              position: 'absolute',
+              bottom: '20px',
+              left: '20px',
+              zIndex: 50,
+              width: '44px',
+              height: '44px',
+              borderRadius: '12px',
+              background: 'rgba(214, 40, 40, 0.15)',
+              border: '1px solid rgba(214, 40, 40, 0.3)',
+              color: '#ff4d4d',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(8px)',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              boxShadow: '0 4px 15px rgba(0,0,0,0.3)'
+            }}
+            onMouseOver={(e) => { e.currentTarget.style.background = 'rgba(214, 40, 40, 0.25)'; e.currentTarget.style.borderColor = '#d62828'; }}
+            onMouseOut={(e) => { e.currentTarget.style.background = 'rgba(214, 40, 40, 0.15)'; e.currentTarget.style.borderColor = 'rgba(214, 40, 40, 0.3)'; }}
+            title={t('app.clear_map')}
+          >
+            <IconTrash size={20} />
+          </button>
 
           {mapInstance && (
             <MapLabels
@@ -990,49 +1125,10 @@ function App() {
         </div>
       </div>
 
-      {/* MOBILE FLOATING ACTION BUTTONS */}
-      {isMobile && !isSidebarOpen && (
-        <div style={{
-          position: 'fixed',
-          bottom: '20px',
-          right: '20px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '10px',
-          zIndex: 40
-        }}>
-          {activeTab === 'editor' && (
-            <button 
-              className={`tool-card ${graphMode === 'ADD_NODE' ? 'active' : ''}`}
-              style={{ padding: '15px', borderRadius: '50%', boxShadow: '0 4px 15px rgba(0,0,0,0.5)', background: graphMode === 'ADD_NODE' ? 'rgba(247, 127, 0, 0.2)' : 'var(--navy-mid)' }}
-              onClick={() => setGraphMode(graphMode === 'ADD_NODE' ? 'IDLE' : 'ADD_NODE')}
-              title={t('app.add_node')}
-            >
-              <span className="tool-icon node-icon" style={{ margin: 0 }}><IconNode /></span>
-            </button>
-          )}
-          {activeTab === 'editor' && (
-            <button 
-               className={`algo-btn ${algorithmMode === 'DIJKSTRA' ? 'active' : ''}`}
-               style={{ padding: '15px', borderRadius: '50%', boxShadow: '0 4px 15px rgba(0,0,0,0.5)', background: algorithmMode === 'DIJKSTRA' ? 'var(--orange)' : 'var(--navy-mid)', color: algorithmMode === 'DIJKSTRA' ? '#000' : '#fff' }}
-               onClick={() => {
-                 setAlgorithmMode(algorithmMode === 'DIJKSTRA' ? 'NONE' : 'DIJKSTRA');
-                 setAlgorithmSelectedNodes([]);
-                 setRouteSolutions([]);
-                 setActiveSolution(0);
-               }}
-               title={t('app.dijkstra')}
-            >
-              <IconRoute />
-            </button>
-          )}
-        </div>
-      )}
-
       <ElementModal
         isOpen={modalConfig.isOpen}
         type={modalConfig.type}
-        initialData={modalConfig.editMode ? modalConfig.data : null}
+        initialData={modalConfig.data}
         editMode={modalConfig.editMode}
         onSave={handleModalSave}
         onCancel={handleModalCancel}

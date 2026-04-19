@@ -37,12 +37,14 @@ export const MapGraphEditor = ({
         if (zoom >= 19) step = 0.00005;
         else if (zoom >= 18) step = 0.0001;
         else if (zoom <= 14.5) step = 0.001;
+        
         const features = [];
         const buffer = step * 5;
         const w = Math.floor((bounds.getWest() - buffer) / step) * step;
         const e = Math.ceil((bounds.getEast() + buffer) / step) * step;
         const s = Math.floor((bounds.getSouth() - buffer) / step) * step;
         const n = Math.ceil((bounds.getNorth() + buffer) / step) * step;
+        
         for (let x = w; x <= e; x += step) features.push({ type: 'Feature', geometry: { type: 'LineString', coordinates: [[x, s], [x, n]] } });
         for (let y = s; y <= n; y += step) features.push({ type: 'Feature', geometry: { type: 'LineString', coordinates: [[w, y], [e, y]] } });
         return { type: 'FeatureCollection', features };
@@ -102,6 +104,7 @@ export const MapGraphEditor = ({
                 map.addImage('arrow-right', ctx.getImageData(0,0,40,40));
             }
             if (!map.getLayer('lyr-arrows')) map.addLayer({ id: 'lyr-arrows', type: 'symbol', source: 'src-edges', layout: { 'symbol-placement': 'line', 'symbol-spacing': 70, 'icon-image': 'arrow-right', 'icon-size': 0.45, 'icon-rotation-alignment': 'map', 'icon-pitch-alignment': 'viewport', 'icon-allow-overlap': true, 'icon-ignore-placement': true } });
+            if (!map.getLayer('lyr-route-arrows')) map.addLayer({ id: 'lyr-route-arrows', type: 'symbol', source: 'src-route', layout: { 'symbol-placement': 'line', 'symbol-spacing': 50, 'icon-image': 'arrow-right', 'icon-size': 0.5, 'icon-rotation-alignment': 'map', 'icon-pitch-alignment': 'viewport', 'icon-allow-overlap': true, 'icon-ignore-placement': true }, paint: { 'icon-color': '#ffffff' } });
 
             layersReady.current = true;
             setSetupTick(t => t + 1);
@@ -141,12 +144,42 @@ export const MapGraphEditor = ({
             nodes3dSrc.setData({ type: 'FeatureCollection', features: buffer });
         }
 
-        // 2. Edges & Muralla
+        // 2 & 3. Route & Edges Sync (Single Pass Logic)
+        const sol = routeSolutions?.soluciones?.find(s => s.solucion === activeSolution);
+        let routeLines = sol?.features?.filter(f => f.geometry.type === 'LineString') || [];
+        
+        // Build signatures for route segments using coordinate pairs (robust matching)
+        const routeEdgeSignatures = new Set();
+        routeLines.forEach(f => {
+            const coords = f.geometry.coordinates;
+            if (coords.length >= 2) {
+                const pStart = coords[0], pEnd = coords[coords.length - 1];
+                const sig = [
+                    [pStart[0].toFixed(6), pStart[1].toFixed(6)].join(','),
+                    [pEnd[0].toFixed(6), pEnd[1].toFixed(6)].join(',')
+                ].sort().join('|');
+                routeEdgeSignatures.add(sig);
+            }
+        });
+
+        // Map base Edges (with hiding logic)
         const edgeFeatures = edges.map((e, idx) => {
             const n1 = nodes.find(n => n.id === e.startNodeId);
             const n2 = nodes.find(n => n.id === e.endNodeId);
             if (!n1 || !n2) return null;
-            return { type: 'Feature', geometry: { type: 'LineString', coordinates: [[n1.lng, n1.lat], [n2.lng, n2.lat]] }, properties: { idx, ...e } };
+            
+            // Generate signature for base edge
+            const sig = [
+                [n1.lng.toFixed(6), n1.lat.toFixed(6)].join(','),
+                [n2.lng.toFixed(6), n2.lat.toFixed(6)].join(',')
+            ].sort().join('|');
+            const hideBaseArrow = routeEdgeSignatures.has(sig);
+
+            return { 
+                type: 'Feature', 
+                geometry: { type: 'LineString', coordinates: [[n1.lng, n1.lat], [n2.lng, n2.lat]] }, 
+                properties: { idx, ...e, hideBaseArrow } 
+            };
         }).filter(Boolean);
         map.getSource('src-edges').setData({ type: 'FeatureCollection', features: edgeFeatures });
 
@@ -172,9 +205,25 @@ export const MapGraphEditor = ({
             murallaSrc.setData({ type: 'FeatureCollection', features: buffer });
         }
 
-        // 3. Route (2D & 3D)
-        const sol = routeSolutions?.soluciones?.find(s => s.solucion === activeSolution);
-        const routeLines = sol?.features?.filter(f => f.geometry.type === 'LineString') || [];
+        // Fix Direction for Dijkstra (pointing away from Source)
+        if (sol && (routeSolutions.algorithm === 'DIJKSTRA' || sol.algorithm === 'DIJKSTRA' || sol.type === 'FeatureCollection')) {
+            const startNodeId = algorithmSelectedNodes?.[0]?.id;
+            const startNode = nodes.find(n => String(n.id) === String(startNodeId));
+            if (startNode) {
+                const sLng = startNode.lng, sLat = startNode.lat;
+                routeLines = routeLines.map(f => {
+                    const coords = [...f.geometry.coordinates];
+                    if (coords.length >= 2) {
+                        const pStart = coords[0], pEnd = coords[coords.length - 1];
+                        const d1 = Math.pow(pStart[0] - sLng, 2) + Math.pow(pStart[1] - sLat, 2);
+                        const d2 = Math.pow(pEnd[0] - sLng, 2) + Math.pow(pEnd[1] - sLat, 2);
+                        // If path end is closer to source than path start, flip it
+                        if (d2 < d1) coords.reverse();
+                    }
+                    return { ...f, properties: { ...f.properties, isPath: true }, geometry: { ...f.geometry, coordinates: coords } };
+                });
+            }
+        }
         map.getSource('src-route').setData({ type: 'FeatureCollection', features: routeLines });
 
         const route3dSrc = map.getSource('src-route-3d');
@@ -216,9 +265,15 @@ export const MapGraphEditor = ({
             'lyr-muralla-3d': (is3DMode && mapStyle === 'https://tiles.openfreemap.org/styles/liberty') ? 'visible' : 'none',
             'lyr-buildings-3d': is3DMode ? 'visible' : 'none',
             'lyr-route-3d': (is3DMode && routeSolutions?.soluciones?.length > 0) ? 'visible' : 'none',
+            'lyr-route-arrows': (routeSolutions?.soluciones?.length > 0) ? 'visible' : 'none',
         };
 
         Object.entries(visibility).forEach(([id, val]) => { if (map.getLayer(id)) map.setLayoutProperty(id, 'visibility', val); });
+        
+        // FILTER base arrows to hide duplicated/conflicting ones on active route
+        if (map.getLayer('lyr-arrows')) {
+            map.setFilter('lyr-arrows', ['!', ['get', 'hideBaseArrow']]);
+        }
 
         // OPACITY SYNC
         if (map.getLayer('lyr-muralla-3d')) map.setPaintProperty('lyr-muralla-3d', 'fill-extrusion-opacity', graphOpacity);
@@ -260,8 +315,20 @@ export const MapGraphEditor = ({
         ['lyr-nodes', 'lyr-nodes-3d', 'lyr-edges'].forEach(id => { if (map.getLayer(id)) { map.on('mouseenter', id, enter); map.on('mouseleave', id, leave); } });
 
         if (showGrid) {
-            gridHandler.current = () => { const s = map.getSource('src-grid'); if (s) s.setData(buildGrid()); };
+            let timeoutId;
+            gridHandler.current = () => {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => {
+                    const s = map.getSource('src-grid'); 
+                    if (s) s.setData(buildGrid());
+                }, 150); // 150ms debounce for performance
+            };
             map.on('moveend', gridHandler.current);
+            // Ejecución inicial segura
+            setTimeout(() => { const s = map.getSource('src-grid'); if (s) s.setData(buildGrid()); }, 50);
+        } else {
+             const s = map.getSource('src-grid'); 
+             if (s) s.setData({ type: 'FeatureCollection', features: [] });
         }
 
         return () => {

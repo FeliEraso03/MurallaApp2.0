@@ -8,6 +8,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Base64;
+
+
 @Service
 @RequiredArgsConstructor
 public class OAuth2UserService {
@@ -16,6 +21,7 @@ public class OAuth2UserService {
 
     @Transactional
     public User createOrGetOAuth2User(String email, String fullName, String picture) {
+        final String savedPicture = downloadAndEncodeImage(picture);
         return repository.findByEmail(email).orElseGet(() -> {
             UserPreference pref = UserPreference.builder()
                     .defaultTimeAvailableHours(4)
@@ -32,7 +38,7 @@ public class OAuth2UserService {
             User newUser = User.builder()
                     .fullName(fullName)
                     .email(email)
-                    .profilePictureUrl(picture)
+                    .profilePictureUrl(savedPicture)
                     .password("") // no password for OAuth2 users
                     .role(Role.USER)
                     .preference(pref)
@@ -41,5 +47,23 @@ public class OAuth2UserService {
             pref.setUser(newUser);
             return repository.save(newUser);
         });
+    }
+
+    private String downloadAndEncodeImage(String pictureUrl) {
+        if (pictureUrl == null || pictureUrl.isEmpty() || !pictureUrl.startsWith("http")) {
+            return pictureUrl; // Fallback to original
+        }
+        try {
+            URL url = new URL(pictureUrl);
+            try (InputStream is = url.openStream()) {
+                byte[] bytes = is.readAllBytes();
+                String base64 = Base64.getEncoder().encodeToString(bytes);
+                // Detemine MIME roughly. Google returns jpeg usually
+                return "data:image/jpeg;base64," + base64;
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to download profile picture: " + e.getMessage());
+            return pictureUrl; // Fallback to original URL string
+        }
     }
 }
