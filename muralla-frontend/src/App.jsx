@@ -325,7 +325,7 @@ function App() {
       const headers = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;
 
-      const response = await fetch('http://localhost:8081/api/solver/solve', {
+      const response = await fetch('/api/solver/solve', {
         method: 'POST',
         headers,
         body: JSON.stringify(geojson)
@@ -538,7 +538,7 @@ function App() {
           ]
         };
 
-        const resp = await fetch('http://localhost:3000/upload-geojson', {
+        const resp = await fetch('/api/solver/solve', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(geojson)

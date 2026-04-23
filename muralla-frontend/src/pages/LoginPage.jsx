@@ -75,7 +75,7 @@ export function LoginPage() {
 
   const handleGoogle = () => {
     // Google OAuth redirect — backend Spring Security OAuth2 endpoint
-    window.location.href = 'http://localhost:8081/oauth2/authorization/google';
+    window.location.href = '/oauth2/authorization/google';
   };
 
   if (i18nLoading) {

@@ -3,6 +3,14 @@
     {
       "source": "/api/:path*",
       "destination": "https://muralla-backend-njod.onrender.com/api/:path*"
+    },
+    {
+      "source": "/oauth2/:path*",
+      "destination": "https://muralla-backend-njod.onrender.com/oauth2/:path*"
+    },
+    {
+      "source": "/login/oauth2/:path*",
+      "destination": "https://muralla-backend-njod.onrender.com/login/oauth2/:path*"
     }
   ]
 }
